@@ -58,7 +58,7 @@ const Navbar = () => {
         <div className="md:hidden mt-4 space-y-4 px-4">
           <a href="/" className="block">
             <Link to="/mvp_demo">
-            <button className="w-full bg-green-600 py-2 px-4 rounded-md text-white flex items-center gap-2 justify-center">
+            <button className="w-full bg-green-600 py-2 px-4 mb-4 rounded-md text-white flex items-center gap-2 justify-center">
               <CiPlay1 size={20} />
               Try Demo
             </button>
