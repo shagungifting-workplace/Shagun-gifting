@@ -146,7 +146,7 @@ export default function Sign_login() {
                 </form>
             </div>
 
-            <p className="mt-4 text-sm text-gray-700">
+            <p className="mt-4 text-sm text-gray-700 text-center px-2 sm:px-4 break-words leading-relaxed">
                 Need to register as a host first?
                 <Link to="/mobile_ver"  className="text-[#ec6b19] font-medium"> Complete Host Registration</Link>
 
