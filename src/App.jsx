@@ -4,7 +4,14 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import AdminDashboard from './pages/AdminDashboard';
-import Reg_com from "./components/Registration_complete/Reg_com.jsx";
+import Reg_com from "./pages/Reg_com.jsx";
+import Budget_bank from "./pages/Budget_bank.jsx";
+import Event_det from "./pages/Event_det.jsx";
+import Host_dash from "./pages/Host_dash.jsx";
+import Mobile_ver from "./pages/Mobile_ver.jsx";
+import Mvp_demo from "./pages/Mvp_demo.jsx";
+import Personal_det from "./pages/Personal_det.jsx";
+import Sign_login from "./pages/Sign_login.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -38,7 +45,14 @@ function App() {
   return (
     <Router>
       <AppContent />
-      <Reg_com/>
+      {/*<Reg_com/>*/}
+      {/*<Budget_bank/>*/}
+      {/*<Event_det/>*/}
+      {/*<Host_dash/>*/}
+      {/*  <Mobile_ver/>*/}
+      {/*  <Mvp_demo/>*/}
+      {/*  <Personal_det/>*/}
+      {/*  <Sign_login/>*/}
     </Router>
 
   );
