@@ -57,17 +57,19 @@ const Navbar = () => {
       {menuOpen && (
         <div className="md:hidden mt-4 space-y-4 px-4">
           <a href="/" className="block">
+            <Link to="/mvp_demo">
             <button className="w-full bg-green-600 py-2 px-4 rounded-md text-white flex items-center gap-2 justify-center">
               <CiPlay1 size={20} />
               Try Demo
             </button>
+            </Link>
           </a>
-          <a href="/courses" className="block">
+          <Link to="/hostlogin">
             <button className="w-full py-2 px-4 border border-gray-300 rounded-md flex items-center gap-2 justify-center">
               <MdOutlinePeople size={20} />
               Host Login
             </button>
-          </a>
+          </Link>
           <Link to="/admin" className="block">
             <button className="w-full px-4 py-2 border border-gray-300 rounded-md flex items-center gap-2 justify-center">
               <FaRegChartBar size={20} />
