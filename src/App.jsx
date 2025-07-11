@@ -35,6 +35,8 @@ function AppContent() {
           <Route path="/reg_com" element={<Reg_com/>} />
 
 
+
+
         <Route
           path="/hostlogin"
           element={<div className="p-10 text-center text-xl">Coming Soon</div>}
