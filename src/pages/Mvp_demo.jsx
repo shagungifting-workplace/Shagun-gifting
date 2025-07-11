@@ -80,7 +80,7 @@ const Mvp_demo = () => {
             : 0;
 
     return (
-        <div className="font-sans p-8 bg-[#fff6f1] min-h-screen">
+        <div className="font-sans p-8 bg-[#fff6f1] min-h-screen" id="mvp-demo">
             <h1 className="text-3xl font-bold text-center text-[#111]">Shagun MVP Demo & Testing</h1>
             <p className="text-center text-[#444] mb-6">Test your IoT vending concept without real machines</p>
 

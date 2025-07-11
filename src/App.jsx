@@ -26,6 +26,8 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/mvp_demo" element={<Mvp_demo/>} />
+
         <Route
           path="/hostlogin"
           element={<div className="p-10 text-center text-xl">Coming Soon</div>}

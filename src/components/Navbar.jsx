@@ -18,12 +18,13 @@ const Navbar = () => {
 
         <ul className="hidden md:flex gap-4 text-gray-700 font-medium">
           <li>
-            <a href="/">
+            <Link to="/mvp_demo">
               <button className="bg-green-600 py-2 px-4 rounded-xl text-white flex items-center gap-2">
                 <CiPlay1 size={20} />
                 Try Demo
               </button>
-            </a>
+            </Link>
+
           </li>
           <li>
             <a href="/hostlogin">

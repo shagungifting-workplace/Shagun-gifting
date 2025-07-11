@@ -4,6 +4,7 @@ import { AiOutlineThunderbolt } from "react-icons/ai";
 import { IoMdCheckmarkCircleOutline } from "react-icons/io";
 import { IoIosArrowForward } from "react-icons/io";
 import { LuSmartphone, LuQrCode,LuShield  } from "react-icons/lu";
+import {Link} from "react-router-dom";
 const Home = () => {
   return (
     <div className="text-center">
@@ -24,11 +25,16 @@ const Home = () => {
           Secure, traceable, and convenient.
         </p>
 
+
         <div className="flex justify-center gap-4 flex-wrap">
+          <ul><li><Link to="/mvp_demo">
           <button className="flex items-center gap-2 bg-[#fa541c] text-white py-2 px-6 rounded-lg hover:bg-[#fa541f]">
             <AiOutlineThunderbolt />
             Test MVP Now
           </button>
+          </Link></li></ul>
+
+
           <button className="flex items-center gap-2 border border-[#fa541c] py-2 px-6 rounded-lg bg-white text-[#a44b2e] hover:bg-gray-100">
             <IoGiftOutline />
             Register as Host
@@ -43,9 +49,15 @@ const Home = () => {
           <p className="text-green-700 mb-4">
             Test the complete flow without IoT hardware. Validate your concept with real user feedback.
           </p>
+
+
+          <ul><li><Link to="/mvp_demo">
           <button className="text-white bg-green-600 px-4 py-2 font-medium rounded-lg hover:bg-green-700">
             Start Testing →
           </button>
+          </Link></li></ul>
+
+
         </div>
       </section>
 
