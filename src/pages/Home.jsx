@@ -109,9 +109,11 @@ const Home = () => {
           Join thousands of hosts who trust Shagun for their special occasions.
         </p>
         <div className="flex justify-center mt-6">
+          <Link to="/mobile_ver">
         <button className="flex items-center gap-2 bg-white text-orange-700 font-semibold px-6 py-3 rounded-lg hover:bg-gray-100">
           Get Started Today <IoIosArrowForward />
         </button>
+          </Link>
       </div>
       </section>
     </div>

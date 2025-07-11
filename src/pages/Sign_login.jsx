@@ -47,7 +47,7 @@ export default function Sign_login() {
     };
 
     return (
-        <div className="min-h-screen bg-[#fef4ed] px-4 py-6 flex flex-col items-center" id="host_sign_login">
+        <div className="min-h-screen bg-[#fef4ed]  flex flex-col items-center" id="host_sign_login">
             {/* ✅ Matching Host_dash Navbar */}
             <div className="w-full max-w-10xl flex justify-between items-center bg-white px-6 py-4 border-b border-[#f2c0a2] rounded-t-xl mb-6">
                 <Link to="/">

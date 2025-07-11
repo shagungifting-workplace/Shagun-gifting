@@ -13,7 +13,7 @@ export default function Personal_det() {
     return (
         <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-[#fff5eb] to-[#fffdee]">
             {/* Navbar */}
-            <div className="flex justify-between items-center px-5 py-3 bg-white border-b border-gray-200 gap-3 overflow-x-auto whitespace-nowrap">
+            <div className="flex justify-between items-center px-9 py-7 bg-white border-b border-gray-200 gap-3 overflow-x-auto whitespace-nowrap">
                 <div className="flex items-center gap-3">
                     <Link to="/">
                         <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />

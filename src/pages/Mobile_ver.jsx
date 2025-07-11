@@ -9,7 +9,7 @@ export default function Mobile_ver() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#fef4f2] via-[#fdf7f4] to-[#fefae9]">
             {/* Navbar */}
-            <div className="flex justify-between items-center px-5 py-3 bg-white border-b border-[#eee] gap-3 flex-nowrap overflow-x-auto">
+            <div className="flex justify-between items-center px-9 py-7 bg-white border-b border-[#eee] gap-3 flex-nowrap overflow-x-auto">
                 <div className="flex items-center gap-2 shrink-0 min-w-0">
                     <Link to="/">
                     <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
