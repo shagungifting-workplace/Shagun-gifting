@@ -70,9 +70,9 @@ const Home = () => {
           Combining traditional values with modern technology for seamless gifting experiences.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4  ">
           {/* Card 1 */}
-          <div className="border border-orange-300 bg-white p-8 rounded-xl max-w-md w-full mx-auto text-left hover:shadow-lg">
+          <div className="border border-orange-300 bg-white p-8 rounded-xl max-w-md w-full mx-auto text-left transform transition duration-500 hover:scale-125 hover:shadow-[0_10px_20px_rgba(245,101,39,0.3)] cursor-pointer">
             <LuSmartphone className="text-orange-600 text-5xl mb-4 bg-orange-100 px-1 py-1 rounded-xl" />
             <h4 className="font-semibold text-xl mb-2">Mobile-First Design</h4>
             <p className="text-gray-600">
@@ -81,7 +81,7 @@ const Home = () => {
           </div>
 
           {/* Card 2 */}
-          <div className="border border-orange-300 bg-white  p-8 rounded-xl max-w-md w-full mx-auto text-left hover:shadow-lg">
+          <div className="border border-orange-300 bg-white  p-8 rounded-xl max-w-md w-full mx-auto text-left transform transition duration-500 hover:scale-125 hover:shadow-[0_10px_20px_rgba(245,101,39,0.3)] cursor-pointer">
 
             <LuQrCode className="text-red-700 bg-pink-200 px-1 py-1 rounded-xl text-5xl mb-4" />
             <h4 className="font-semibold text-xl mb-2">QR Code Payments</h4>
@@ -91,7 +91,7 @@ const Home = () => {
           </div>
 
           {/* Card 3 */}
-          <div className="border border-orange-300 bg-white p-8 rounded-xl max-w-md w-full mx-auto text-left hover:shadow-lg">
+          <div className="border border-orange-300 bg-white p-8 rounded-xl max-w-md w-full mx-auto text-left transform transition duration-500 hover:scale-125 hover:shadow-[0_10px_20px_rgba(245,101,39,0.3)] cursor-pointer">
             <LuShield className="text-yellow-600 text-5xl bg-yellow-200 px-1 py-2 rounded-xl mb-4" />
             <h4 className="font-semibold text-xl mb-2">Secure & Reliable</h4>
             <p className="text-gray-600">
