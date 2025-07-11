@@ -1,6 +1,7 @@
 // src/components/Footer.jsx
 import React from 'react';
 import { FaInstagram, FaXTwitter, FaLinkedin, FaYoutube } from 'react-icons/fa6';
+import {Link} from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -20,9 +21,9 @@ const Footer = () => {
         <div>
           <h3 className="text-md font-semibold mb-3">For Hosts</h3>
           <ul className="space-y-2 text-gray-400">
-            <li><a href="#">Host Registration</a></li>
-            <li><a href="#">Host Login</a></li>
-            <li><a href="#">Live Demo</a></li>
+            <li><Link to="/mobile_ver"><a href="#">Host Registration</a></Link></li>
+            <li><Link to="/hostlogin"><a href="#">Host Login</a></Link></li>
+            <li><Link to="/mvp_demo"><a href="#">Live Demo</a></Link></li>
           </ul>
         </div>
 
