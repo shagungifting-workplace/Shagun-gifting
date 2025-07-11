@@ -130,7 +130,7 @@ export default function Sign_login() {
                             className="absolute right-3 top-2/4 -translate-y-1/2 cursor-pointer text-sm"
                             onClick={() => setShowPassword(!showPassword)}
                         >
-                            {showPassword ? '👁️' : '🙈'}
+                            {showPassword ? '👁' : ' '}
                         </span>
                         {errors.password && (
                             <span className="text-red-600 text-xs">{errors.password}</span>
@@ -147,10 +147,9 @@ export default function Sign_login() {
             </div>
 
             <p className="mt-4 text-sm text-gray-700">
-                Need to register as a host first?{' '}
-                <a href="#" className="text-[#ec6b19] font-medium">
-                    Complete Host Registration
-                </a>
+                Need to register as a host first?
+                <Link to="/mobile_ver"  className="text-[#ec6b19] font-medium"> Complete Host Registration</Link>
+
             </p>
         </div>
     );
