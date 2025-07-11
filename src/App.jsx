@@ -4,6 +4,7 @@ import Navbar from './Components/Navbar';
 import Footer from './Components/Footer';
 import Home from './pages/Home';
 import AdminDashboard from './pages/AdminDashboard';
+import Reg_com from "./components/Registration_complete/Reg_com.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -37,7 +38,9 @@ function App() {
   return (
     <Router>
       <AppContent />
+      <Reg_com/>
     </Router>
+
   );
 }
 
