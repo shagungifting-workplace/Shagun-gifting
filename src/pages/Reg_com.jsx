@@ -1,6 +1,7 @@
 import React from "react";
 import { FaArrowLeft, FaCheck, FaCheckCircle, FaGift } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function Reg_com() {
     const navigate = useNavigate();
@@ -11,7 +12,9 @@ export default function Reg_com() {
             {/* ✅ Navbar */}
             <div className="flex justify-between items-center px-5 py-3 bg-white border-b border-gray-200 gap-3 overflow-x-auto whitespace-nowrap">
                 <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
-                    <FaArrowLeft className="text-[16px] text-gray-800 cursor-pointer flex-shrink-0" />
+                    <Link to="/">
+                        <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
+                    </Link>
                     <FaGift className="text-[20px] text-orange-600 flex-shrink-0" />
                     <span className="font-semibold text-lg text-orange-600">Shagun</span>
                 </div>
@@ -43,12 +46,14 @@ export default function Reg_com() {
                         <li>✓ SMS notifications enabled</li>
                     </ul>
 
+                    <Link to="/">
                     <button
                         className="bg-gradient-to-r from-[#ff7a18] to-[#ff4e50] hover:from-[#e44d26] hover:to-[#c0392b] text-white font-medium py-2 px-6 rounded-lg transition duration-300"
                         onClick={() => navigate("/")}
                     >
                         Home
                     </button>
+                    </Link>
                 </div>
             </div>
         </div>

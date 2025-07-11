@@ -27,12 +27,13 @@ const Navbar = () => {
 
           </li>
           <li>
-            <a href="/hostlogin">
+            <Link to="/hostlogin">
               <button className="py-2 px-4 border border-gray-300 rounded-xl flex items-center gap-2">
                 <MdOutlinePeople size={20} />
                 Host Login
               </button>
-            </a>
+            </Link>
+
           </li>
           <li>
            <Link to="/admin">

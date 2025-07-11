@@ -2,6 +2,8 @@ import React from 'react';
 import { FaArrowLeft, FaCheck, FaGift } from "react-icons/fa";
 import giftIcon from './../assets/react.svg'; // Replace with actual gift icon
 import phoneIcon from './../assets/react.svg';
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function Mobile_ver() {
     return (
@@ -9,9 +11,13 @@ export default function Mobile_ver() {
             {/* Navbar */}
             <div className="flex justify-between items-center px-5 py-3 bg-white border-b border-[#eee] gap-3 flex-nowrap overflow-x-auto">
                 <div className="flex items-center gap-2 shrink-0 min-w-0">
+                    <Link to="/">
                     <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
+                    </Link>
                     <FaGift className="text-[20px] text-[#f45b0b] shrink-0" />
+
                     <span className="font-semibold text-[1.2rem] text-[#f45b0b] whitespace-nowrap sm:text-[1rem] xs:text-[0.9rem]">Shagun</span>
+
                 </div>
                 <div className="flex items-center gap-2 shrink-0 min-w-0">
                     <div className="w-[26px] h-[26px] rounded-full bg-[#f45b0b] text-white text-[14px] font-semibold flex items-center justify-center shrink-0 xs:w-[20px] xs:h-[20px] xs:text-[10px]">1</div>
@@ -44,7 +50,9 @@ export default function Mobile_ver() {
                     <label className="block text-left mb-1 text-[0.95rem] text-[#111] font-medium">Enter OTP</label>
                     <input type="text" placeholder="Enter 6-digit OTP" className="w-full p-3 mb-4 border border-[#ddd] rounded-lg text-base sm:text-[0.95rem]" />
 
+                    <Link to="/personal_det">
                     <button className="w-full p-3 bg-[#0e132a] text-white text-base rounded-lg cursor-pointer sm:text-[0.95rem]">Verify OTP</button>
+                    </Link>
                 </div>
             </div>
         </div>

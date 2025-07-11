@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaInfoCircle, FaCreditCard, FaArrowLeft, FaGift, FaCheck } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 export default function Budget_bank() {
     const [formData, setFormData] = useState({
@@ -46,7 +47,9 @@ export default function Budget_bank() {
             {/* Navbar */}
             <div className="flex justify-between items-center px-5 py-3 bg-white border-b border-gray-200 gap-3 overflow-x-auto whitespace-nowrap rounded-md mb-6">
                 <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
-                    <FaArrowLeft className="text-[16px] text-gray-800 cursor-pointer" />
+                    <Link to="/">
+                        <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
+                    </Link>
                     <FaGift className="text-[20px] text-orange-600" />
                     <span className="font-semibold text-lg text-orange-600">Shagun</span>
                 </div>
@@ -146,6 +149,7 @@ export default function Budget_bank() {
                     matters as per company policies
                 </p>
 
+                <Link to="/reg_com">
                 <button
                     type="submit"
                     disabled={!formData.accepted}
@@ -155,6 +159,7 @@ export default function Budget_bank() {
                 >
                     Complete Registration
                 </button>
+                </Link>
 
                 {formData.amount && (
                     <div className="bg-[#fff2e5] border border-[#ffc89d] p-4 rounded-lg text-center mt-6">

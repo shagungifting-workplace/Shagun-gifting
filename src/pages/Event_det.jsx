@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaGift, FaArrowLeft, FaCheck } from 'react-icons/fa';
+import {Link} from 'react-router-dom';
 
 export default function Event_det() {
     return (
@@ -8,7 +9,9 @@ export default function Event_det() {
             {/* ✅ Navbar */}
             <div className="flex justify-between items-center px-5 py-3 bg-white border-b border-gray-200 gap-3 overflow-x-auto whitespace-nowrap">
                 <div className="flex items-center gap-3 flex-shrink-0">
-                    <FaArrowLeft className="text-[16px] text-gray-800 cursor-pointer" />
+                    <Link to="/">
+                        <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
+                    </Link>
                     <FaGift className="text-[20px] text-orange-600" />
                     <span className="font-semibold text-lg text-orange-600">Shagun</span>
                 </div>
@@ -121,12 +124,14 @@ export default function Event_det() {
                         </div>
 
                         {/* Submit Button */}
+                        <Link to="/budget_bank">
                         <button
                             type="submit"
                             className="w-full bg-[#0a0e2a] text-white font-medium text-lg py-3 rounded-md hover:bg-[#141a3a] transition-colors"
                         >
                             Continue
                         </button>
+                        </Link>
                     </form>
                 </div>
             </div>

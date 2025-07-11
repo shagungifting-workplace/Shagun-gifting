@@ -7,7 +7,7 @@ import { LuSmartphone, LuQrCode,LuShield  } from "react-icons/lu";
 import {Link} from "react-router-dom";
 const Home = () => {
   return (
-    <div className="text-center">
+    <div className="text-center" id="home">
 
       {/* Hero Section */}
       <section className="px-6 py-24 bg-[#fef3eb]">
@@ -35,10 +35,12 @@ const Home = () => {
           </Link></li></ul>
 
 
+          <ul><li><Link to="/mobile_ver">
           <button className="flex items-center gap-2 border border-[#fa541c] py-2 px-6 rounded-lg bg-white text-[#a44b2e] hover:bg-gray-100">
             <IoGiftOutline />
             Register as Host
           </button>
+          </Link></li></ul>
         </div>
 
         <div className="max-w-4xl text-center py-6 px-8 mt-10 bg-[#ecfdf5] rounded-xl border border-green-400 mx-auto">

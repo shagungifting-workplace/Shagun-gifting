@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import logo from './../assets/shagunicon.png';
+import { Link } from 'react-router-dom';
 
 export default function Sign_login() {
     const [isLogin, setIsLogin] = useState(true);
@@ -46,12 +47,14 @@ export default function Sign_login() {
     };
 
     return (
-        <div className="min-h-screen bg-[#fef4ed] px-4 py-6 flex flex-col items-center">
+        <div className="min-h-screen bg-[#fef4ed] px-4 py-6 flex flex-col items-center" id="host_sign_login">
             {/* ✅ Matching Host_dash Navbar */}
             <div className="w-full max-w-10xl flex justify-between items-center bg-white px-6 py-4 border-b border-[#f2c0a2] rounded-t-xl mb-6">
+                <Link to="/">
                 <a href="#" className="text-[#e56a1d] text-base font-medium hover:underline">
                     ← Back to Home
                 </a>
+                </Link>
                 <img src={logo} alt="Shagun Logo" className="h-[50px]" />
             </div>
 

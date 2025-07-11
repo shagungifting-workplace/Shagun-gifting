@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { FaUpload, FaArrowLeft, FaGift, FaCheck } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function Personal_det() {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -13,7 +15,9 @@ export default function Personal_det() {
             {/* Navbar */}
             <div className="flex justify-between items-center px-5 py-3 bg-white border-b border-gray-200 gap-3 overflow-x-auto whitespace-nowrap">
                 <div className="flex items-center gap-3">
-                    <FaArrowLeft className="text-base text-gray-800 cursor-pointer flex-shrink-0" />
+                    <Link to="/">
+                        <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
+                    </Link>
                     <FaGift className="text-lg text-[#f45b0b] flex-shrink-0" />
                     <span className="text-[#f45b0b] font-semibold text-lg sm:text-base">Shagun</span>
                 </div>
@@ -60,9 +64,11 @@ export default function Personal_det() {
                         />
                     </div>
 
+                    <Link to="/event_det">
                     <button className="w-full bg-[#0e1328] hover:bg-[#1c2035] text-white font-semibold py-3 rounded-lg text-base">
                         Continue
                     </button>
+                    </Link>
                 </div>
             </div>
         </div>
