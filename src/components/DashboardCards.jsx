@@ -12,6 +12,7 @@ import Payments from "./dashboardtabs/Payments";
 import Hosts from "./dashboardtabs/Hosts";
 import Agents from "./dashboardtabs/Agents";
 import Analytics from "./dashboardtabs/Analytics";
+import { Link } from "react-router-dom";
 
 const DashboardCards = () => {
   const [activeTab, setActiveTab] = useState("Events");
@@ -58,14 +59,17 @@ const DashboardCards = () => {
           <p className="text-sm text-gray-500">+180 from last month</p>
         </div>
 
-        <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-green-500">
-          <div className="flex justify-between items-center">
-            <p className="text-sm text-gray-600 font-semibold">Active Events</p>
-            <FaCalendarAlt className="text-xl text-green-500" />
+        <Link to="/active-events">
+          <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-green-500 cursor-pointer hover:shadow-md transition">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-gray-600 font-semibold">Active Events</p>
+              <FaCalendarAlt className="text-xl text-green-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-black">23</h2>
+            <p className="text-sm text-gray-500">Live events running</p>
           </div>
-          <h2 className="text-2xl font-bold text-black">23</h2>
-          <p className="text-sm text-gray-500">Live events running</p>
-        </div>
+        </Link>
+
 
         <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-orange-500">
           <div className="flex justify-between items-center">
@@ -140,5 +144,4 @@ const DashboardCards = () => {
     </div>
   );
 };
-
 export default DashboardCards;
