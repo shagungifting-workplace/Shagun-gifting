@@ -17,15 +17,20 @@ const Navbar = () => {
         </div>
 
         <ul className="hidden md:flex gap-4 text-gray-700 font-medium">
-          <li>
-            <Link to="/mvp_demo">
-              <button className="bg-green-600 py-2 px-4 rounded-xl text-white flex items-center gap-2">
-                <CiPlay1 size={20} />
-                Try Demo
-              </button>
-            </Link>
 
-          </li>
+
+          {/*<li>*/}
+          {/*  <Link to="/mvp_demo">*/}
+          {/*    <button className="bg-green-600 py-2 px-4 rounded-xl text-white flex items-center gap-2">*/}
+          {/*      <CiPlay1 size={20} />*/}
+          {/*      Try Demo*/}
+          {/*    </button>*/}
+          {/*  </Link>*/}
+
+          {/*</li>*/}
+
+
+
           <li>
             <Link to="/hostlogin">
               <button className="py-2 px-4 border border-gray-300 rounded-xl flex items-center gap-2">
@@ -56,14 +61,23 @@ const Navbar = () => {
 
       {menuOpen && (
         <div className="md:hidden mt-4 space-y-4 px-4">
+
+
           <a href="/" className="block">
-            <Link to="/mvp_demo">
-            <button className="w-full bg-green-600 py-2 px-4 mb-4 rounded-md text-white flex items-center gap-2 justify-center">
-              <CiPlay1 size={20} />
-              Try Demo
-            </button>
-            </Link>
+
+
+            {/*<Link to="/mvp_demo">*/}
+            {/*<button className="w-full bg-green-600 py-2 px-4 mb-4 rounded-md text-white flex items-center gap-2 justify-center">*/}
+            {/*  <CiPlay1 size={20} />*/}
+            {/*  Try Demo*/}
+            {/*</button>*/}
+            {/*</Link>*/}
+
+
           </a>
+
+
+
           <Link to="/hostlogin">
             <button className="w-full py-2 px-4 border border-gray-300 rounded-md flex items-center gap-2 justify-center">
               <MdOutlinePeople size={20} />
