@@ -40,7 +40,7 @@ const ProjectCodePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#fdf6ed]">
+    <div className="min-h-screen bg-[#fdf6ed] pb-6">
       {/* Navbar */}
       <nav className="bg-[#4a0f23] text-white flex justify-between items-center px-6 py-4 relative">
         <h1 className="text-xl font-bold ml-2">Admin Dashboard</h1>
@@ -73,7 +73,7 @@ const ProjectCodePage = () => {
 
       <div className="px-10 lg:px-16">
         {/* Breadcrumb */}
-        <div className="px-6 py-6 text-sm text-[#8b5e3c] font-bold">
+        <div className="px-6 py-6 text-base text-[#8b5e3c] font-bold">
           Projects / <span className="text-black font-medium">{code}</span>
         </div>
 
@@ -106,7 +106,7 @@ const ProjectCodePage = () => {
         {/* Stats + Overview */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 px-4 sm:px-6 mb-6">
           {/* Stat Cards */}
-          <div className="bg-[#e1c65b] text-black rounded-lg p-4 sm:p-5 flex flex-col justify-center items-center text-center h-auto">
+          <div className="bg-[#e1c65b] text-black rounded-lg p-4 sm:p-2 flex flex-col justify-center items-center text-center h-auto">
             <h3 className="text-xl sm:text-2xl font-bold leading-tight">88/100</h3>
             <p className="text-sm sm:text-base text-gray-800 mt-1">Envelopes Dispensed</p>
           </div>
@@ -115,7 +115,7 @@ const ProjectCodePage = () => {
             <h3 className="text-xl sm:text-2xl font-bold">Threshold Exceeded</h3>
           </div>
 
-          <div className="bg-[#e1c65b] text-black rounded-lg p-4 sm:p-5 flex flex-col justify-center items-center text-center h-auto">
+          <div className="bg-[#e1c65b] text-black rounded-lg p-4 sm:p-2 flex flex-col justify-center items-center text-center h-auto">
             <p className="text-sm sm:text-base text-gray-800">Total Revenue</p>
             <h3 className="text-xl sm:text-2xl font-bold leading-tight mt-1">₹10,000</h3>
           </div>
@@ -139,7 +139,7 @@ const ProjectCodePage = () => {
                 </div>
                 <div className="flex flex-col gap-4 pl-6">
                   <p className="flex flex-col text-gray-600 leading-tight">
-                    <span className="invisible text-xl">6</span>
+                    <span className="invisible text-xl">.</span>
                     Vednaten
                   </p>
                   <p className="flex flex-col text-gray-600 leading-tight">
@@ -165,7 +165,7 @@ const ProjectCodePage = () => {
             <div className="bg-[#e1c65b] text-black rounded p-4 text-sm flex justify-between flex-1">
               <div>
                 <p className="font-medium text-gray-800">Remission</p>
-                <h3 className="text-2xl font-bold">₹2,000</h3>
+                <h3 className="text-2xl font-bold">₹2.000</h3>
               </div>
               <div>
                 <p className="font-medium text-gray-800">Refund</p>
@@ -175,7 +175,7 @@ const ProjectCodePage = () => {
             <div className="bg-white rounded p-4 text-sm flex justify-between flex-1">
               <div>
                 <p className="text-sm font-semibold text-gray-700">Refund</p>
-                <p className="text-2xl font-bold text-black">₹5,000</p>
+                <p className="text-2xl font-bold text-black">₹5.000</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500 mt-1">1–3 days</p>
@@ -196,7 +196,7 @@ const ProjectCodePage = () => {
           <div className="overflow-x-auto rounded-xl">
             <table className="min-w-[600px] w-full text-sm text-left border border-gray-300">
               <thead>
-                <tr className="bg-[#fcf4ea] text-gray-600 uppercase text-xs">
+                <tr className="bg-[#fcf4ea] text-gray-600  text-xs">
                   <th className="p-2">ID</th>
                   <th className="p-2">UPI ID</th>
                   <th className="p-2">Mobile Number</th>
