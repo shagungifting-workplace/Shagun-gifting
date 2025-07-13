@@ -15,6 +15,7 @@ import Personal_det from './pages/Personal_det.jsx';
 import Sign_login from './pages/Sign_login.jsx';
 import ActiveEvents from './pages/ActiveEvents.jsx';
 import ProjectCodePage from './pages/ProjectCodePage.jsx';
+import Host_Dashboard from "./pages/Host_Dashboard.jsx";
 
 function AppContent() {
   const location = useLocation();
@@ -48,6 +49,7 @@ function AppContent() {
         <Route path="/event_det" element={<Event_det />} />
         <Route path="/budget_bank" element={<Budget_bank />} />
         <Route path="/reg_com" element={<Reg_com />} />
+        <Route path="/host_dash" element={<Host_Dashboard />} />
         <Route path="/active-events" element={<ActiveEvents />} />
         <Route path="/project/:code" element={<ProjectCodePage />} />
         <Route

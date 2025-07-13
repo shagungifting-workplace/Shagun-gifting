@@ -57,7 +57,7 @@ export default function Reg_com() {
                             </button>
                         </Link>
 
-                        <Link to="/">
+                        <Link to="/host_dash">
                             <button
                                 className="w-full bg-gradient-to-r from-[#ff7a18] to-[#ff4e50] hover:from-[#e44d26] hover:to-[#c0392b] text-white font-medium py-2 px-6 rounded-lg transition duration-300"
                                 onClick={() => navigate("/")}
