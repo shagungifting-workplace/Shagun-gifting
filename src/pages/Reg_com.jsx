@@ -1,7 +1,6 @@
 import React from "react";
 import { FaArrowLeft, FaCheck, FaCheckCircle, FaGift } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Reg_com() {
     const navigate = useNavigate();
@@ -37,7 +36,8 @@ export default function Reg_com() {
 
                     <div className="bg-[#f6f9fb] rounded-lg p-4 mb-6">
                         <p className="text-gray-600 text-base mb-1">Your Project Code:</p>
-                        {/* <p className="text-orange-500 text-lg font-bold">{projectCode}</p> */}
+
+                         <p className="text-orange-500 text-lg font-bold">123456789123456789</p>
                     </div>
 
                     <ul className="text-gray-800 text-base list-none space-y-2 mb-6 leading-relaxed">
@@ -46,14 +46,26 @@ export default function Reg_com() {
                         <li>✓ SMS notifications enabled</li>
                     </ul>
 
-                    <Link to="/">
-                    <button
-                        className="bg-gradient-to-r from-[#ff7a18] to-[#ff4e50] hover:from-[#e44d26] hover:to-[#c0392b] text-white font-medium py-2 px-6 rounded-lg transition duration-300"
-                        onClick={() => navigate("/")}
-                    >
-                        Home
-                    </button>
-                    </Link>
+                    {/* ✅ Buttons vertically stacked */}
+                    <div className="flex flex-col gap-3">
+                        <Link to="/">
+                            <button
+                                className="w-full bg-gradient-to-r from-[#ff7a18] to-[#ff4e50] hover:from-[#e44d26] hover:to-[#c0392b] text-white font-medium py-2 px-6 rounded-lg transition duration-300"
+                                onClick={() => navigate("/")}
+                            >
+                                Home
+                            </button>
+                        </Link>
+
+                        <Link to="/">
+                            <button
+                                className="w-full bg-gradient-to-r from-[#ff7a18] to-[#ff4e50] hover:from-[#e44d26] hover:to-[#c0392b] text-white font-medium py-2 px-6 rounded-lg transition duration-300"
+                                onClick={() => navigate("/")}
+                            >
+                                Host Dashboard
+                            </button>
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
