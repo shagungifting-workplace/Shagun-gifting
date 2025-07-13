@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 import { FiDownload } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 
 const Host_Dashboard = () => {
     const [showAll, setShowAll] = useState(false);
@@ -21,9 +22,11 @@ const Host_Dashboard = () => {
         <div className="p-4 bg-[#f2f2f2] font-['Segoe UI',sans-serif]">
             {/* 🔙 Top Navigation Bar */}
             <div className="flex flex-wrap justify-between items-center mb-4">
+                <Link to="/">
                 <button className="flex items-center gap-2 text-[#2a2a2a] font-semibold text-base">
                     <IoIosArrowBack size={20} /> Host Dashboard
                 </button>
+                </Link>
                 <span className="text-sm font-medium text-gray-600">500019-20250708-0225-2</span>
             </div>
 
