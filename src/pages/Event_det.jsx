@@ -1,8 +1,61 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaGift, FaArrowLeft, FaCheck } from 'react-icons/fa';
-import {Link} from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { db, auth } from '../utils/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function Event_det() {
+    const navigate = useNavigate();
+
+    const [pin, setPin] = useState('');
+    const [venueName, setVenueName] = useState('');
+    const [address, setAddress] = useState('');
+    const [eventDate, setEventDate] = useState('');
+    const [startTime, setStartTime] = useState('');
+    const [endTime, setEndTime] = useState('');
+    const [eventNumber, setEventNumber] = useState('');
+    const [heroNames, setHeroNames] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!pin || !venueName || !address || !eventDate || !startTime || !endTime || !eventNumber || !heroNames) {
+            alert("Please fill in all required fields.");
+            return;
+        }
+
+        try {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("User not logged in.");
+                return;
+            }
+
+            setLoading(true);
+
+            await setDoc(doc(db, `users/${user.uid}/eventDetails/info`), {
+                pin,
+                venueName,
+                address,
+                eventDate,
+                startTime,
+                endTime,
+                eventNumber: parseInt(eventNumber),
+                heroNames,
+                updatedAt: serverTimestamp()
+            });
+
+            alert("Event details saved!");
+            navigate('/budget_bank');
+        } catch (error) {
+            console.error("Error saving event details:", error);
+            alert("Failed to save event details.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#fff5ee] to-[#fffaf0]">
 
@@ -35,7 +88,7 @@ export default function Event_det() {
                 <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-3xl">
                     <h2 className="text-2xl font-semibold mb-6">Event Details</h2>
 
-                    <form className="space-y-6">
+                    <form className="space-y-6" onSubmit={handleSubmit}>
                         {/* PIN and Venue Name */}
                         <div className="flex flex-wrap gap-4">
                             <div className="flex flex-col flex-1 min-w-[240px]">
@@ -43,6 +96,8 @@ export default function Event_det() {
                                 <input
                                     type="text"
                                     placeholder="Enter venue PIN code"
+                                    value={pin}
+                                    onChange={(e) => setPin(e.target.value)}
                                     required
                                     className="p-2 border rounded-md"
                                 />
@@ -51,6 +106,8 @@ export default function Event_det() {
                                 <label className="font-medium mb-1">Venue Name *</label>
                                 <input
                                     type="text"
+                                    value={venueName}
+                                    onChange={(e) => setVenueName(e.target.value)}
                                     required
                                     className="p-2 border rounded-md"
                                 />
@@ -61,6 +118,8 @@ export default function Event_det() {
                         <div className="flex flex-col">
                             <label className="font-medium mb-1">Venue Address *</label>
                             <textarea
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
                                 required
                                 className="p-2 border rounded-md min-h-[80px] resize-none"
                             ></textarea>
@@ -72,6 +131,8 @@ export default function Event_det() {
                                 <label className="font-medium mb-1">Event Date *</label>
                                 <input
                                     type="date"
+                                    value={eventDate}
+                                    onChange={(e) => setEventDate(e.target.value)}
                                     required
                                     className="p-2 border rounded-md"
                                 />
@@ -80,6 +141,8 @@ export default function Event_det() {
                                 <label className="font-medium mb-1">Start Time *</label>
                                 <input
                                     type="time"
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.target.value)}
                                     required
                                     className="p-2 border rounded-md"
                                 />
@@ -88,6 +151,8 @@ export default function Event_det() {
                                 <label className="font-medium mb-1">End Time *</label>
                                 <input
                                     type="time"
+                                    value={endTime}
+                                    onChange={(e) => setEndTime(e.target.value)}
                                     required
                                     className="p-2 border rounded-md"
                                 />
@@ -101,14 +166,12 @@ export default function Event_det() {
                                 <input
                                     type="number"
                                     placeholder="Event sequence number"
+                                    value={eventNumber}
+                                    onChange={(e) => setEventNumber(e.target.value)}
                                     min="1"
                                     step="1"
                                     required
-                                    onKeyDown={(e) => {
-                                        if (["e", "E", "+", "-"].includes(e.key)) {
-                                            e.preventDefault();
-                                        }
-                                    }}
+                                    onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
                                     className="p-2 border rounded-md"
                                 />
                             </div>
@@ -117,6 +180,8 @@ export default function Event_det() {
                                 <input
                                     type="text"
                                     placeholder="Enter names"
+                                    value={heroNames}
+                                    onChange={(e) => setHeroNames(e.target.value)}
                                     required
                                     className="p-2 border rounded-md"
                                 />
@@ -124,14 +189,13 @@ export default function Event_det() {
                         </div>
 
                         {/* Submit Button */}
-                        <Link to="/budget_bank">
                         <button
                             type="submit"
                             className="w-full bg-[#0a0e2a] text-white font-medium text-lg py-3 rounded-md hover:bg-[#141a3a] transition-colors"
+                            disabled={loading}
                         >
-                            Continue
+                            {loading ? "Saving..." : "Continue"}
                         </button>
-                        </Link>
                     </form>
                 </div>
             </div>

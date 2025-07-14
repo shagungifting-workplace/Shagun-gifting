@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import logo from './../assets/shagunicon.png';
 import { Link } from 'react-router-dom';
+import { auth, db } from "../utils/firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { setDoc, doc, serverTimestamp, getDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 export default function Sign_login() {
     const [isLogin, setIsLogin] = useState(true);
@@ -11,6 +15,8 @@ export default function Sign_login() {
     });
     const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     const handleToggle = (mode) => {
         setIsLogin(mode === 'login');
@@ -36,14 +42,73 @@ export default function Sign_login() {
         return newErrors;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = validate();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
         }
-        alert(`${isLogin ? 'Logged in' : 'Account created'} successfully!`);
+
+        setLoading(true);
+
+        try {
+            if (isLogin) {
+                // 🔐 Login existing user
+                const data = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+                console.log("data from login:", data);
+
+                // check is user is complete the payment or not
+                const uid = data.user.uid;
+                if (!uid) {
+                    throw new Error("User ID not found");
+                }
+                try {
+                    const docRef = doc(db, `users/${uid}/eventDetails/budget`);
+                    const docSnap = await getDoc(docRef);
+                    console.log(docSnap)
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if(data.isComplete === true){
+                            alert("Login successful!");
+                            navigate("/host_dash");
+                        } else {
+                            alert("Please do complete your payment first.");
+                            navigate("/budget_bank");
+                            return;
+                        }
+                    } else{
+                        alert("Please complete your registraion !");
+                        navigate("/mobile_ver");
+                        return;
+                    }
+                } catch (error) {
+                    console.error("Error fetching isComplete:", error);
+                }
+                
+            } else {
+                // Create user
+                const userCred = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+                const uid = userCred.user.uid;
+                console.log("uid from signup:", uid);
+
+                // Store user data under: users/{uid}/userDetails/info
+                await setDoc(doc(db, `users/${uid}/userDetails/info`), {
+                    uid: uid,
+                    fullName: formData.fullName,
+                    email: formData.email,
+                    createdAt: serverTimestamp(),
+                });
+
+                alert("Account created successfully!");
+                navigate("/mobile_ver");
+            }
+        } catch (error) {
+            console.error("Auth error:", error);
+            alert(error.message || "Authentication failed.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -90,6 +155,7 @@ export default function Sign_login() {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4 text-left">
+                    {/* full name */}
                     {!isLogin && (
                         <div>
                             <input
@@ -105,7 +171,8 @@ export default function Sign_login() {
                         </div>
                     )}
 
-                    <div>
+                    {/* email */}
+                    <div>   
                         <input
                             type="email"
                             placeholder="Enter your email"
@@ -117,7 +184,8 @@ export default function Sign_login() {
                             <span className="text-red-600 text-xs">{errors.email}</span>
                         )}
                     </div>
-
+                    
+                    {/* password */}
                     <div className="relative">
                         <input
                             type={showPassword ? 'text' : 'password'}
@@ -136,12 +204,14 @@ export default function Sign_login() {
                             <span className="text-red-600 text-xs">{errors.password}</span>
                         )}
                     </div>
-
+                    
+                    {/* button */}
                     <button
                         type="submit"
+                        disabled={loading}
                         className="w-full bg-[#f36b1c] text-white py-2 rounded-md font-semibold hover:bg-[#e46010]"
                     >
-                        {isLogin ? 'Sign In' : 'Create Account'}
+                        {loading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
                     </button>
                 </form>
             </div>

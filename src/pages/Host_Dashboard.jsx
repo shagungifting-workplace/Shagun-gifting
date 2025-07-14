@@ -23,9 +23,9 @@ const Host_Dashboard = () => {
             {/* 🔙 Top Navigation Bar */}
             <div className="flex flex-wrap justify-between items-center mb-4">
                 <Link to="/">
-                <button className="flex items-center gap-2 text-[#2a2a2a] font-semibold text-base">
-                    <IoIosArrowBack size={20} /> Host Dashboard
-                </button>
+                    <button className="flex items-center gap-2 text-[#2a2a2a] font-semibold text-base">
+                        <IoIosArrowBack size={20} /> Host Dashboard
+                    </button>
                 </Link>
                 <span className="text-sm font-medium text-gray-600">500019-20250708-0225-2</span>
             </div>
