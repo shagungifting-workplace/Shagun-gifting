@@ -93,12 +93,16 @@ export default function Sign_login() {
                 console.log("uid from signup:", uid);
 
                 // Store user data under: users/{uid}/userDetails/info
-                await setDoc(doc(db, `users/${uid}/userDetails/info`), {
+                await setDoc(doc(db, `users/${uid}/personalDetails/info`), {
                     uid: uid,
                     fullName: formData.fullName,
                     email: formData.email,
                     createdAt: serverTimestamp(),
                 });
+
+                await setDoc(doc(db, `users/${uid}`), {
+                    registeredAt: serverTimestamp()  // Just one small field
+                }, { merge: true });
 
                 alert("Account created successfully!");
                 navigate("/mobile_ver");

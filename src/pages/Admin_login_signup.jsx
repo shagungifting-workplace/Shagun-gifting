@@ -3,10 +3,10 @@ import logo from './../assets/shagunicon.png';
 import { Link } from 'react-router-dom';
 import { auth, db } from "../utils/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { setDoc, doc, serverTimestamp, getDoc } from "firebase/firestore";
+import { setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
-export default function Sign_login() {
+export default function Admin_Sign_Login() {
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({
         fullName: '',
@@ -58,13 +58,12 @@ export default function Sign_login() {
                 const data = await signInWithEmailAndPassword(auth, formData.email, formData.password);
                 console.log("data from login:", data);
 
-                // check is user is complete the payment or not
                 const uid = data.user.uid;
                 if (!uid) {
                     throw new Error("User ID not found");
                 } else {
                     alert("Login successful!");
-                    navigate("/host_dash");
+                    navigate("/admin");
                 }
                 
             } else {
@@ -82,7 +81,7 @@ export default function Sign_login() {
                 });
 
                 alert("Account created successfully!");
-                navigate("/mobile_ver");
+                navigate("/admin");
             }
         } catch (error) {
             console.error("Auth error:", error);
@@ -106,7 +105,7 @@ export default function Sign_login() {
 
             {/* Header */}
             <div className="text-center mb-4">
-                <h2 className="text-2xl font-bold">Host Account</h2>
+                <h2 className="text-2xl font-bold">Admin Account</h2>
                 <p className="text-gray-600 text-sm">
                     Login or create an account to manage your events
                 </p>
@@ -197,12 +196,6 @@ export default function Sign_login() {
                     </button>
                 </form>
             </div>
-
-            <p className="mt-4 text-sm text-gray-700 text-center px-2 sm:px-4 break-words leading-relaxed">
-                Need to register as a host first?
-                <Link to="/mobile_ver"  className="text-[#ec6b19] font-medium"> Complete Host Registration</Link>
-
-            </p>
         </div>
     );
 }

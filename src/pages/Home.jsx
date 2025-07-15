@@ -83,7 +83,7 @@ const Home = () => {
                             <Link to="/hostlogin">
                                 <button className="flex items-center gap-2 border border-[#fa541c] py-2 px-6 rounded-lg bg-white text-[#a44b2e] hover:bg-gray-100">
                                     <IoGiftOutline />
-                                    Register as Host
+                                    Register as Host    
                                 </button>
                             </Link>
                         </li>

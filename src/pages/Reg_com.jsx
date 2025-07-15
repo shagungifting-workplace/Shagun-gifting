@@ -7,10 +7,10 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 export default function Reg_com() {
     const navigate = useNavigate();
     const [paymentInfo, setPaymentInfo] = useState(null);
-    const [eventInfo, setEventInfo] = useState(null);
+    const [projectCode, setProjectCode] = useState("");
 
     useEffect(() => {
-        const fetchPaymentData = async () => {
+        const fetchDataAndGenerateCode = async () => {
             try {
                 const user = auth.currentUser;
                 if (!user) {
@@ -18,11 +18,9 @@ export default function Reg_com() {
                     return;
                 }
 
+                // Fetch payment
                 const paymentRef = doc(db, `users/${user.uid}/eventDetails/payment`);
                 const paymentSnap = await getDoc(paymentRef);
-
-                const eventRef = doc(db, `users/${user.uid}/eventDetails/info`);
-                const eventSnap = await getDoc(eventRef);
 
                 if (paymentSnap.exists()) {
                     setPaymentInfo(paymentSnap.data());
@@ -30,43 +28,35 @@ export default function Reg_com() {
                     console.warn("No payment document found.");
                 }
 
+                // Fetch event info
+                const eventRef = doc(db, `users/${user.uid}/eventDetails/info`);
+                const eventSnap = await getDoc(eventRef);
+
                 if (eventSnap.exists()) {
-                    setEventInfo(eventSnap.data());
+                    const eventData = eventSnap.data();
+
+                    // ✅ Generate project code
+                    if (eventData?.pin && eventData?.eventDate && eventData?.startTime && eventData?.eventNumber) {
+                        const formattedDate = eventData.eventDate.replace(/-/g, "");
+                        const formattedTime = eventData.startTime.replace(/:/g, "");
+                        const generatedCode = `${eventData.pin}-${formattedDate}-${formattedTime}-${eventData.eventNumber}`;
+                        setProjectCode(generatedCode);
+
+                        // ✅ Save to Firestore
+                        await setDoc(eventRef, { projectCode: generatedCode }, { merge: true });
+                        console.log("✅ Project code saved to Firestore.");
+                    }
                 } else {
                     console.warn("No event info found.");
                 }
 
             } catch (error) {
-                console.error("Error fetching payment data:", error);
+                console.error("Error fetching data:", error);
             }
         };
 
-        fetchPaymentData();
-        console.log("payment", paymentInfo);
+        fetchDataAndGenerateCode();
     }, []);
-
-    const generateProjectCode = async () => {
-        if (!eventInfo?.pin || !eventInfo?.eventDate || !eventInfo?.startTime || !eventInfo?.eventNumber) return "Loading...";
-
-        const formattedDate = eventInfo.eventDate.replace(/-/g, "");
-        const formattedTime = eventInfo.startTime.replace(/:/g, "");
-        const projectCode = `${eventInfo.pin}-${formattedDate}-${formattedTime}-${eventInfo.eventNumber}`;
-
-        try {
-            const user = auth.currentUser;
-            if (user) {
-                const infoRef = doc(db, `users/${user.uid}/eventDetails/info`);
-                await getDoc(infoRef); // Check if doc exists (optional)
-                await setDoc(infoRef, { projectCode }, { merge: true });
-                console.log("✅ Project code saved to Firestore.");
-            }
-        } catch (error) {
-            console.error("❌ Error saving project code to Firestore:", error);
-        }
-
-        return projectCode;
-    };
-
 
     return (
         <div>
@@ -114,7 +104,7 @@ export default function Reg_com() {
                             Your Project Code:
                         </p>
                         <p className="text-orange-500 text-lg font-bold tracking-wider">
-                            {eventInfo && generateProjectCode()}
+                            {projectCode || "Loading..."}
                         </p>
                     </div>
 

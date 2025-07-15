@@ -3,7 +3,7 @@ import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { FiDownload } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { auth, db } from "../utils/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, setDoc, doc, getDoc, serverTimestamp, } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
 const Host_Dashboard = () => {
@@ -13,12 +13,16 @@ const Host_Dashboard = () => {
     const [budgetInfo, setBudgetInfo] = useState({});
     const [projectCode, setProjectCode] = useState("");
     const [transactions, setTransactions] = useState([]);
+    const [envelopeCount, setEnvelopeCount] = useState("");
+    const [rechargeSuccess, setRechargeSuccess] = useState(false);
+
     console.log("set", setTransactions) // Placeholder if you integrate later
 
     const totalAmount = transactions.reduce((sum, txn) => sum + txn.amount, 0);
     const totalTransactions = transactions.length;
     const displayedTxns = showAll ? transactions : transactions.slice(0, 3);
 
+    // load db
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -67,6 +71,78 @@ const Host_Dashboard = () => {
         return () => unsubscribe(); // Clean up the listener on unmount
     }, []);
 
+    const handleEnvelopeRecharge = async () => {
+        const user = auth.currentUser;
+        if (!user) {
+            alert("User not logged in");
+            return;
+        }
+
+        const rechargeAmount = parseInt(envelopeCount);
+        const totalRecharge = rechargeAmount * (5/100); // 5% of tottal amount
+
+        const options = {
+            key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+            amount: totalRecharge * 100, // paise
+            currency: "INR",
+            name: "Shagun - Envelope Recharge",
+            description: "Add envelopes to your event",
+            handler: async function (response) {
+                try {
+                    const uid = user.uid;
+
+                    // Step 1: Get existing transactions to determine count
+                    const txnsRef = collection(db, `users/${uid}/eventDetails/envelopeRecharges`);
+                    const snapshot = await getDocs(txnsRef);
+                    const transactionId = snapshot.size + 1;
+
+                    // Step 2: Update member count in budget
+                    const budgetRef = doc(db, `users/${uid}/eventDetails/budget`);
+                    const budgetSnap = await getDoc(budgetRef);
+                    const prevMembers = budgetSnap.exists() ? (budgetSnap.data().members || 0) : 0;
+
+                    await setDoc(
+                        budgetRef,
+                        {
+                            members: prevMembers + rechargeAmount,
+                            lastRechargedAt: serverTimestamp(),
+                        },
+                        { merge: true }
+                    );
+
+                    // Step 3: Store recharge transaction
+                    await setDoc(
+                        doc(db, `users/${uid}/eventDetails/envelopeRecharges/transaction_${transactionId}`),
+                        {
+                            transactionId,
+                            addedEnvelopes: rechargeAmount,
+                            totalPaid: totalRecharge,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            paidAt: serverTimestamp(),
+                        }
+                    );
+
+                    setRechargeSuccess(true);
+                    setEnvelopeCount("");
+                    alert("Envelope recharge successful!");
+                } catch (err) {
+                    console.error("Error storing envelope recharge:", err);
+                    alert("Recharge failed to save.");
+                }
+            },
+            prefill: {
+                name: auth.currentUser?.displayName || "",
+                contact: auth.currentUser?.phoneNumber || "",
+            },
+            theme: {
+                color: "#cc0066"
+            }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+    };
+
     return (
         <div className="p-4 bg-[#f2f2f2] font-['Segoe UI',sans-serif]">
             {/* 🔙 Top Navigation Bar */}
@@ -86,8 +162,8 @@ const Host_Dashboard = () => {
                     <div className="flex-1">
                         <h2 className="text-xl font-semibold text-[#1e1e2f]">{hostInfo.fullName || "Loading..."}</h2>
                         <p>
-                            Event: {eventInfo?.eventType} | Side: {eventInfo?.side} |{" "}
-                            {eventInfo?.side === "Bride" ? `Heroine: ${eventInfo?.heroineName}` : `Hero: ${eventInfo?.heroName}`}
+                            Event: {hostInfo?.eventType} | Side: {hostInfo?.side} |{" "}
+                            {eventInfo?.side === "Bride" ? `Heroine: ${eventInfo?.heroNames}` : `Hero: ${eventInfo?.heroNames}`}
                         </p>
                         <p>Venue: {eventInfo?.venueName}</p>
                         <p>
@@ -124,12 +200,15 @@ const Host_Dashboard = () => {
 
                 {/* 🧾 Info Boxes */}
                 <div className="flex flex-wrap gap-4">
+
+                    {/* overview */}
                     <div className="flex-1 min-w-[250px] p-4 rounded-lg bg-[#e6f0ff] text-[#003366] shadow-sm">
                         <h4 className="font-semibold mb-1">Overview</h4>
                         <p>Guests: {budgetInfo?.members || "--"}</p>
                         <p>Budget: ₹{budgetInfo?.amount?.toLocaleString() || "--"}</p>
                     </div>
 
+                    {/* financial overview */}
                     <div className="flex-1 min-w-[250px] p-4 rounded-lg bg-[#f3e6ff] text-[#4b0082] shadow-sm">
                         <h4 className="font-semibold mb-1">Financial Overview</h4>
                         <p>UPI Collected: ₹{totalAmount}</p>
@@ -138,6 +217,7 @@ const Host_Dashboard = () => {
                         <p>Recharge Payments: ₹0</p>
                     </div>
 
+                    {/* upi details */}
                     <div className="flex-1 min-w-[250px] p-4 rounded-lg bg-[#ffddc3] text-[#994d00] shadow-sm">
                         <h4 className="font-semibold mb-1">UPI Details (Gifts)</h4>
                         <div className="bg-[#ccc] text-center p-6 rounded-md my-2">QR CODE HERE</div>
@@ -147,17 +227,35 @@ const Host_Dashboard = () => {
                         </p>
                     </div>
 
+                    {/* envelope recharge */}
                     <div className="flex-1 min-w-[250px] p-4 rounded-lg bg-[#ffe6f0] text-[#cc0066] shadow-sm">
                         <h4 className="font-semibold mb-1">Envelope Usage</h4>
-                        <p>Used: 0 / {budgetInfo?.members}</p>
+                        <p>Used: 0 / {budgetInfo?.members || "Loading..."}</p>
+
                         <input
-                            type="text"
+                            type="number"
+                            min="1"
                             placeholder="Add envelopes"
+                            value={envelopeCount}
+                            onChange={(e) => setEnvelopeCount(e.target.value)}
                             className="mt-2 p-2 w-full rounded border border-gray-300"
                         />
-                        <button className="mt-3 w-3/4 bg-[#cc0066] text-white py-2 rounded-md">
+
+                        <button
+                            onClick={handleEnvelopeRecharge}
+                            disabled={!envelopeCount || envelopeCount <= 0}
+                            className={`mt-3 w-3/4 ${
+                                envelopeCount > 0
+                                    ? "bg-[#cc0066] hover:bg-[#b10059]"
+                                    : "bg-gray-300 cursor-not-allowed"
+                            } text-white py-2 rounded-md transition-colors`}
+                        >
                             Recharge Budget (5% fee)
                         </button>
+
+                        {rechargeSuccess && (
+                            <p className="text-green-700 text-sm mt-2 font-medium">✅ Recharge Successful</p>
+                        )}
                     </div>
                 </div>
 

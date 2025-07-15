@@ -5,7 +5,7 @@ import phoneIcon from "./../assets/react.svg";
 import { Link,useNavigate } from "react-router-dom";
 import { auth, db } from "../utils/firebase";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { RecaptchaVerifier, linkWithPhoneNumber } from "firebase/auth";
+import { RecaptchaVerifier, linkWithPhoneNumber, } from "firebase/auth";
 
 export default function Mobile_ver() {
 
@@ -52,8 +52,8 @@ export default function Mobile_ver() {
             }
 
             if (!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'send-otp-btn', {
-                    'size': 'invisible',
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    'size': 'normal',
                     'callback': (response) => {
                         console.log("reCAPTCHA solved", response);
                     },
@@ -69,6 +69,7 @@ export default function Mobile_ver() {
 
             const result = await linkWithPhoneNumber(currentUser, `+91${phone}`, appVerifier);
             setConfirmationResult(result);
+            window.confirmationResult = result;
             alert("OTP sent successfully!");
         } catch (error) {
             console.error("Error sending OTP:", error);
@@ -94,7 +95,7 @@ export default function Mobile_ver() {
             console.log("OTP verification successful:", result);
             const user = auth.currentUser;
             const uid = user.uid;
-            
+
             console.log("User verified:", user);
 
             // Save user data in Firestore
@@ -185,6 +186,8 @@ export default function Mobile_ver() {
                         placeholder="Enter email address"
                         className="w-full p-3 mb-4 border border-[#ddd] rounded-lg text-base sm:text-[0.95rem]"
                     />
+
+                    <div id="recaptcha-container" className="my-3" />
 
                     {/* Send OTP Button */}
                     <button 
