@@ -6,15 +6,14 @@ import { IoIosArrowForward } from "react-icons/io";
 import { LuSmartphone, LuQrCode, LuShield } from "react-icons/lu";
 import { Link } from "react-router-dom";
 
+// images
+import sliderImg1 from '../assets/slider_img1.jpg';
+import sliderImg2 from '../assets/slider_img2.jpg';
+import sliderImg3 from '../assets/slider_img3.jpg';
+import sliderImg4 from '../assets/slider_img4.jpg';
+
 // ImageSlider component
-const images = [
-    "https://picsum.photos/id/1011/800/600",
-    "https://picsum.photos/id/1012/800/600",
-    "https://picsum.photos/id/1015/800/600",
-    "https://picsum.photos/id/1016/800/600",
-    "https://picsum.photos/id/1020/800/600",
-    "https://picsum.photos/id/1021/800/600",
-];
+const images = [sliderImg1, sliderImg2, sliderImg3, sliderImg4];
 
 const ImageSlider = () => {
     const [currentIndex, setCurrentIndex] = React.useState(1);
@@ -26,35 +25,41 @@ const ImageSlider = () => {
         return () => clearInterval(interval);
     }, []);
 
-    const getIndices = () => {
-        const prev = (currentIndex - 1 + images.length) % images.length;
-        const next = (currentIndex + 1) % images.length;
-        return [prev, currentIndex, next];
+    const getVisibleImages = () => {
+        const indices = [];
+        for (let i = -2; i <= 2; i++) {
+            const index = (currentIndex + i + images.length) % images.length;
+            indices.push(index);
+        }
+        return indices;
     };
 
-    const [left, center, right] = getIndices();
 
     return (
-        <div className="flex gap-4 md:gap-8 lg:gap-12 transition-all duration-500 w-screen">
-            {[left, center, right].map((index, i) => {
-                const isCenter = index === center;
-                return (
-                    <div
-                        key={index}
-                        className={`relative transition-all duration-500 rounded-lg overflow-hidden 
-                                    ${isCenter ? "scale-125 z-10" : "scale-100 opacity-50"}
-                                    w-[150px] sm:w-[220px] md:w-[280px] lg:w-[320px] xl:w-[360px]
-
-            `}
-                    >
-                        <img
-                            src={images[index]}
-                            alt={`Slide ${index}`}
-                            className="w-full h-auto object-cover rounded-lg"
-                        />
-                    </div>
-                );
-            })}
+        <div className="relative w-full overflow-hidden">
+            <div className="flex justify-center items-center transition-transform duration-700 ease-in-out">
+                <div className="flex gap-4 md:gap-8 lg:gap-12">
+                    {getVisibleImages().map((imageIndex, i) => {
+                        const isCenter = i === 2;
+                        return (
+                            <div
+                                key={`${imageIndex}-${i}`}
+                                className={`
+                                    transition-all duration-700 transform w-[120px] sm:w-[180px] md:w-[240px] lg:w-[300px]
+                                    ${ isCenter ? "scale-100 opacity-100 z-10" : "scale-100 opacity-40"} ease-in-out 
+                                    ${ i === 0 || i === 4 ? "hidden sm:block opacity-0 scale-90" : ""} rounded-xl overflow-hidden
+                                `}
+                            >
+                                <img
+                                    src={images[imageIndex]}
+                                    alt={`Slide ${imageIndex}`}
+                                    className="w-full h-full object-cover rounded-xl shadow-lg"
+                                />
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
         </div>
     );
 };

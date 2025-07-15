@@ -12,7 +12,8 @@ const Host_Dashboard = () => {
     const [eventInfo, setEventInfo] = useState({});
     const [budgetInfo, setBudgetInfo] = useState({});
     const [projectCode, setProjectCode] = useState("");
-    const [transactions, setTransactions] = useState([]); // Placeholder if you integrate later
+    const [transactions, setTransactions] = useState([]);
+    console.log("set", setTransactions) // Placeholder if you integrate later
 
     const totalAmount = transactions.reduce((sum, txn) => sum + txn.amount, 0);
     const totalTransactions = transactions.length;
