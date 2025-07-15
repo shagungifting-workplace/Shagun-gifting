@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaArrowLeft, FaCheck, FaCheckCircle, FaGift } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import { auth, db } from "../utils/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 export default function Reg_com() {
     const navigate = useNavigate();
@@ -45,17 +45,28 @@ export default function Reg_com() {
         console.log("payment", paymentInfo);
     }, []);
 
-    const generateProjectCode = () => {
+    const generateProjectCode = async () => {
         if (!eventInfo?.pin || !eventInfo?.eventDate || !eventInfo?.startTime || !eventInfo?.eventNumber) return "Loading...";
 
-        // Format date (YYYY-MM-DD → YYYYMMDD)
         const formattedDate = eventInfo.eventDate.replace(/-/g, "");
-
-        // Format time (HH:MM → HHMM)
         const formattedTime = eventInfo.startTime.replace(/:/g, "");
+        const projectCode = `${eventInfo.pin}-${formattedDate}-${formattedTime}-${eventInfo.eventNumber}`;
 
-        return `${eventInfo.pin}-${formattedDate}-${formattedTime}-${eventInfo.eventNumber}`;
+        try {
+            const user = auth.currentUser;
+            if (user) {
+                const infoRef = doc(db, `users/${user.uid}/eventDetails/info`);
+                await getDoc(infoRef); // Check if doc exists (optional)
+                await setDoc(infoRef, { projectCode }, { merge: true });
+                console.log("✅ Project code saved to Firestore.");
+            }
+        } catch (error) {
+            console.error("❌ Error saving project code to Firestore:", error);
+        }
+
+        return projectCode;
     };
+
 
     return (
         <div>
@@ -103,7 +114,7 @@ export default function Reg_com() {
                             Your Project Code:
                         </p>
                         <p className="text-orange-500 text-lg font-bold tracking-wider">
-                            {generateProjectCode()}
+                            {eventInfo && generateProjectCode()}
                         </p>
                     </div>
 
