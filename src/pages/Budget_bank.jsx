@@ -16,6 +16,8 @@ export default function Budget_bank() {
         accepted: false,
     });
 
+    const razorpay_key = import.meta.env.VITE_RAZORPAY_KEY_ID;
+
     const [platformFee, setPlatformFee] = useState(0);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [totalFee, setTotalFee] = useState(0);
@@ -84,7 +86,7 @@ export default function Budget_bank() {
         }
 
         const options = {
-            key: "rzp_test_wmtuzkmUZiFvtM", // 🔁 Replace with your Razorpay key
+            key: razorpay_key, // 🔁 Replace with your Razorpay key
             amount: totalFee * 100, // Razorpay takes amount in paise
             currency: "INR",
             name: "Shagun - Event Payment",

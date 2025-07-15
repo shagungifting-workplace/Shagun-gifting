@@ -5,7 +5,7 @@ import phoneIcon from "./../assets/react.svg";
 import { Link,useNavigate } from "react-router-dom";
 import { auth, db } from "../utils/firebase";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { RecaptchaVerifier, linkWithPhoneNumber  } from "firebase/auth";
+import { RecaptchaVerifier, linkWithPhoneNumber } from "firebase/auth";
 
 export default function Mobile_ver() {
 
@@ -22,7 +22,7 @@ export default function Mobile_ver() {
             window.recaptchaVerifier = new RecaptchaVerifier(auth, 'send-otp-btn', {
                 'size': 'invisible',
                 'callback': (response) => {
-                    console.log("reCAPTCHA solved, allow OTP to proceed.");
+                    console.log("reCAPTCHA solved, allow OTP to proceed.", response);
                 },
                 'expired-callback': () => {
                     console.warn("reCAPTCHA expired. Please refresh.");
@@ -44,24 +44,30 @@ export default function Mobile_ver() {
         setLoading(true);
 
         try {
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                alert("User not signed in.");
+                setLoading(false);
+                return;
+            }
+
             if (!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new RecaptchaVerifier('send-otp-btn', {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'send-otp-btn', {
                     'size': 'invisible',
                     'callback': (response) => {
-                        console.log("reCAPTCHA solved");
+                        console.log("reCAPTCHA solved", response);
                     },
                     'expired-callback': () => {
                         console.warn("reCAPTCHA expired");
                     }
-                }, auth);
+                });
 
                 await window.recaptchaVerifier.render();
             }
 
             const appVerifier = window.recaptchaVerifier;
 
-            // ✅ Link phone number to current user (instead of signIn)
-            const result = await linkWithPhoneNumber(auth.currentUser, `+91${phone}`, appVerifier);
+            const result = await linkWithPhoneNumber(currentUser, `+91${phone}`, appVerifier);
             setConfirmationResult(result);
             alert("OTP sent successfully!");
         } catch (error) {
@@ -85,8 +91,10 @@ export default function Mobile_ver() {
 
         try {
             const result = await confirmationResult.confirm(otp);
+            console.log("OTP verification successful:", result);
             const user = auth.currentUser;
             const uid = user.uid;
+            
             console.log("User verified:", user);
 
             // Save user data in Firestore
