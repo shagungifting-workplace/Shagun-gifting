@@ -1,67 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { IoSearch } from "react-icons/io5";
-import { db } from "../utils/firebase";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { useLoadingStore } from "../store/useLoadingStore";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-
+import { fetchAllProjects } from "../utils/FetchProject";
 
 const ActiveEvents = () => {
     const [projects, setProjects] = useState([]);
     const setLoading = useLoadingStore((state) => state.setLoading);
 
     useEffect(() => {
-        const fetchProjects = async () => {
+        const getProjectByCode = async () => {
             setLoading(true);
             try {
-                const usersRef = collection(db, "users");
-                const usersSnapshot = await getDocs(usersRef);
-                const projects = [];
-
-                for (const userDoc of usersSnapshot.docs) {
-                    const uid = userDoc.id;
-                    const eventInfoRef = doc(db, `users/${uid}/eventDetails/info`);
-                    const eventSnap = await getDoc(eventInfoRef);
-
-                    const personalInfoRef = doc(db, `users/${uid}/personalDetails/info`);
-                    const personalSnap = await getDoc(personalInfoRef);
-
-                    const budgetInfoRef = doc(db, `users/${uid}/eventDetails/budget`);
-                    const budgetSnap = await getDoc(budgetInfoRef);
-
-                    if (eventSnap.exists()) {
-                        const data = eventSnap.data();
-                        const data2 = personalSnap.data();
-                        const budgetData = budgetSnap.data();
-
-                        // Do your logic (e.g., derive status)
-                        projects.push({
-                            code: data.projectCode,
-                            host: data2.fullName || "Unknown",
-                            eventDate: data.eventDate,
-                            startTime: data.startTime,
-                            envelope: budgetData.members,
-                            distributed: data.distributed || 0,
-                            status: data.status || "Running",
-                            refund: data.refund || 0,
-                            iot: data.iot || "Working",
-                        });
-                    }
-
-                }
-
-                setProjects(projects);
-                console.log("Projects fetched:", projects);
-                return projects;
-            }  catch (error) {
+                const allProjects = await fetchAllProjects();
+                setProjects(allProjects);
+            } catch (error) {
                 console.error("Error fetching projects:", error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchProjects()
+
+        getProjectByCode();
     }, [setLoading]);
 
     const handleDownload = () => {
@@ -90,6 +52,9 @@ const ActiveEvents = () => {
         saveAs(blob, `Shagun_Projects_Report_${Date.now()}.xlsx`);
     };
 
+    const iot = 'Working';
+    const status = 'Running';
+
     return (
         <div className="bg-[#fdf6ed] min-h-screen p-6">
             {/* Header */}
@@ -108,7 +73,7 @@ const ActiveEvents = () => {
                 <div className="grid grid-cols-3 gap-4 my-6">
                     <div className="bg-[#f5f1e6] text-center p-4 rounded-lg ">
                         <h2 className="text-3xl font-bold">
-                            {projects.filter((p) => p.status === "Running").length}
+                            {projects?.length}
                         </h2>
                         <p className="text-gray-600">Running Projects</p>
                     </div>
@@ -140,6 +105,7 @@ const ActiveEvents = () => {
                 {/* Table */}
                 <div className="bg-white rounded-lg overflow-x-auto">
                     <table className="w-full table-auto text-left">
+                        {/* title */}
                         <thead>
                             <tr className="bg-[#fcf4ea] text-gray-600 uppercase text-sm">
                                 <th className="p-3">Project Code</th>
@@ -154,35 +120,34 @@ const ActiveEvents = () => {
                         <tbody>
                             {projects.map((proj, i) => (
                                 <tr key={i} className="border-t text-sm">
+                                    {/* uid */}
                                     <td className="p-3">
                                         <Link
-                                            to={`/project/${proj.code}`}
+                                            to={`/project/${proj?.projectCode}`}
                                             className="text-[#4a0f23] font-semibold hover:underline"
                                         >
-                                            {proj.code}
+                                            {proj?.projectCode ?? 0}
                                         </Link>
                                     </td>
+
+                                    {/* host name */}
                                     <td className="p-3 font-semibold whitespace-nowrap">
-                                        {proj.host}
+                                        {proj?.hostName ?? "Unknown"}
                                     </td>
 
                                     {/* envelope */}
                                     <td className="p-3 w-56">
                                         <div className="relative bg-[#f3eadd] h-4 rounded-full">
                                             <div
-                                                className={`absolute left-0 top-0 h-full rounded-full ${
-                                                    proj.status === "Running"
-                                                        ? "bg-[#5e2120]"
-                                                        : "bg-[#c7985d]"
-                                                }`}
+                                                className="absolute left-0 top-0 h-full rounded-full bg-[#5e2120]"
                                                 style={{
                                                     width: `${
-                                                        (proj.distributed / proj.envelope) * 100
+                                                        (proj?.guests.length / proj?.members) * 100
                                                     }%`,
                                                 }}
                                             ></div>
                                             <div className="absolute right-1 top-0 text-xs font-semibold">
-                                                {proj.distributed}/{proj.envelope}
+                                                {proj?.guests.length}/{proj?.members}
                                             </div>
                                         </div>
                                     </td>
@@ -190,29 +155,29 @@ const ActiveEvents = () => {
                                     {/* status */}
                                     <td
                                         className={`p-3 font-medium ${
-                                            proj.status === "Running"
+                                            status === "Running"
                                                 ? "text-[#5e2120]"
                                                 : "text-yellow-600"
                                         }`}
                                     >
-                                        {proj.status}
+                                        {status}
                                     </td>
 
-                                    <td className="p-3 text-gray-700">{proj.refund}</td>
+                                    <td className="p-3 text-gray-700">{proj?.refund ?? 0}</td>
 
                                     {/* IOT machine */}
                                     <td className="p-3">
-                                        {proj.iot === "Working" && (
+                                        {iot === "Working" && (
                                             <span className="text-green-600 font-semibold">
                                                 Working
                                             </span>
                                         )}
-                                        {proj.iot === "Not Working" && (
+                                        {iot === "Not Working" && (
                                             <span className="text-red-500 font-semibold whitespace-nowrap">
                                                 Not Working
                                             </span>
                                         )}
-                                        {proj.iot === "Agent SMS" && (
+                                        {iot === "Agent SMS" && (
                                             <span className="bg-[#d5c286] text-black text-xs px-2 py-1 rounded-md font-medium whitespace-nowrap">
                                                 Agent SMS
                                             </span>

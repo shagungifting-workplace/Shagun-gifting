@@ -8,6 +8,7 @@ import { auth } from "../utils/firebase";
 // import { doc, getDoc } from "firebase/firestore";
 import shagunIcon from "../assets/shagunicon.png";
 import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -60,7 +61,7 @@ const Navbar = () => {
     const handleLogout = async () => {
         try {
             await signOut(auth);
-            alert("Logged out successfully!");
+            toast.success("Logged out successfully!");
             navigate("/");
         } catch (error) {
             console.error("Logout error:", error);
@@ -73,7 +74,7 @@ const Navbar = () => {
         } else if (role === "host") {
             navigate("/host_dash");
         } else {
-            alert("Unknown role or not logged in");
+            toast.error("Unknown role or not logged in");
         }
     };
 

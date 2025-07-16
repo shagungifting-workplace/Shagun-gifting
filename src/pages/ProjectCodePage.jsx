@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { IoIosArrowDown } from "react-icons/io";
-import { db } from "../utils/firebase";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
-
+import { fetchAllProjects } from ".././utils/FetchProject";
 
 const ProjectCodePage = () => {
     const { code } = useParams();
@@ -12,87 +10,46 @@ const ProjectCodePage = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const [projects, setProjects] = useState(null);
-    // code host event venue eventDate startTime envelope distributed revenue remission
 
     useEffect(() => {
-        const fetchProjectByCode = async () => {
-            const usersRef = collection(db, "users");
-            const usersSnapshot = await getDocs(usersRef);
-
-            let foundProject = null;
-
-            for (const userDoc of usersSnapshot.docs) {
-                const uid = userDoc.id;
-
-                const eventRef = doc(db, `users/${uid}/eventDetails/info`);
-                const eventSnap = await getDoc(eventRef);
-
-                if (!eventSnap.exists()) continue;
-
-                const eventData = eventSnap.data();
-
-                // Match the project code from URL
-                if (eventData.projectCode === code) {
-                    // Fetch additional data
-                    const personalSnap = await getDoc(doc(db, `users/${uid}/personalDetails/info`));
-                    const budgetSnap = await getDoc(doc(db, `users/${uid}/eventDetails/budget`));
-
-                    const personalData = personalSnap.exists() ? personalSnap.data() : {};
-                    const budgetData = budgetSnap.exists() ? budgetSnap.data() : {};
-
-                    foundProject = {
-                        code: eventData.projectCode,
-                        host: personalData.fullName || "Unknown",
-                        event: personalData.eventType || "Unknown",
-                        venue: eventData.venueName || "Unknown",
-                        eventDate: eventData.eventDate || "",
-                        startTime: eventData.startTime || "",
-                        envelope: budgetData.members || 0,
-                        distributed: budgetData.distributed || 0,
-                        revenue: budgetData.amount || 0,
-                        remission: budgetData.platformFee || 0,
-                    };
-
-                    break; // stop once found
-                }
-            }
-
-            if (foundProject) {
-                setProjects(foundProject); // set as array to reuse table UI
-                console.log("Found project:", foundProject);
+        const getProjectByCode = async () => {
+            const allProjects = await fetchAllProjects();
+            const matchedProject = allProjects.find(p => p.projectCode === code);
+            if (matchedProject) {
+                matchedProject.guests = [...(matchedProject.guests || [])].sort(
+                    (a, b) => parseInt(b.envelope) - parseInt(a.envelope)
+                );
+                setProjects(matchedProject);
             } else {
-                console.warn("No matching project code found.");
-                setProjects([]);
+                console.warn("Project not found for code:", code);
+                setProjects(null);
             }
         };
 
-        if (code) fetchProjectByCode();
+        if (code) getProjectByCode();
     }, [code]);
 
-    const transactions = [
-        {
-            id: "TXN001",
-            upi: "user1@upi",
-            mobile: "9876543210",
-            amount: "₹100",
-            date: "24 May 2024",
-        },
-        {
-            id: "TXN002",
-            upi: "user2@upi",
-            mobile: "9123456789",
-            amount: "₹200",
-            date: "24 May 2024",
-        },
-        {
-            id: "TXN003",
-            upi: "user3@upi",
-            mobile: "9083727655",
-            amount: "₹500",
-            date: "20 May 2024",
-        },
-    ];
+    const generateRandomId = (length = 14) => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    };
 
+    const generateRandomMobile = () => {
+        const prefix = ['7', '8', '9'][Math.floor(Math.random() * 3)];
+        let number = prefix;
+        for (let i = 0; i < 9; i++) {
+            number += Math.floor(Math.random() * 10);
+        }
+        return number;
+    };
+
+    console.log(projects)
+    const transactions = projects?.guests || [];
+    
     return (
         <div className="min-h-screen bg-[#fdf6ed] pb-6">
             {/* Navbar */}
@@ -157,11 +114,11 @@ const ProjectCodePage = () => {
                     {/* host,event,date/time */}
                     <div className="grid grid-cols-3 gap-6 text-gray-800">
                         <div>
-                            <p>{projects?.host}</p>
+                            <p>{projects?.hostName}</p>
                             <p>event</p>
                         </div>
                         <div>
-                            <p>{projects?.event}</p>
+                            <p>{projects?.eventType}</p>
                             <p>{projects?.venue}</p>
                         </div>
                         <div>
@@ -176,7 +133,7 @@ const ProjectCodePage = () => {
                     {/* Envelopes Dispensed */}
                     <div className="bg-[#e1c65b] text-black rounded-lg p-4 sm:p-2 flex flex-col justify-center items-center text-center h-auto">
                         <h3 className="text-xl sm:text-2xl font-bold leading-tight">
-                            {projects?.distributed ?? 0}/{projects?.envelope}
+                            {projects?.guests.length ?? 0}/{projects?.members}
                         </h3>
                         <p className="text-sm sm:text-base text-gray-800 mt-1">
                             Envelopes Dispensed
@@ -196,7 +153,7 @@ const ProjectCodePage = () => {
                             Total Revenue
                         </p>
                         <h3 className="text-xl sm:text-2xl font-bold leading-tight mt-1">
-                            {projects?.revenue ?? 0}
+                            {projects?.amount ?? 0}
                         </h3>
                     </div>
 
@@ -212,7 +169,7 @@ const ProjectCodePage = () => {
                                 <div className="flex flex-col gap-4 pr-6">
                                     <p className="flex flex-col text-gray-600 leading-tight">
                                         <span className="text-xl font-bold">
-                                            6
+                                            {projects?.guests.length ?? 0}
                                         </span>
                                         Registrations
                                     </p>
@@ -257,7 +214,7 @@ const ProjectCodePage = () => {
                                 <p className="font-medium text-gray-800">
                                     Remission
                                 </p>
-                                <h3 className="text-2xl font-bold">₹{projects?.remission ?? 0}</h3>
+                                <h3 className="text-2xl font-bold">₹{projects?.totalFee ?? 0}</h3>
                             </div>
                             <div>
                                 <p className="font-medium text-gray-800">
@@ -286,6 +243,7 @@ const ProjectCodePage = () => {
                     </div>
                 </div>
 
+                {/* transactions */}
                 <div className="mx-6">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-md font-bold">Transactions</h3>
@@ -297,6 +255,7 @@ const ProjectCodePage = () => {
                     {/* Table Wrapper */}
                     <div className="overflow-x-auto rounded-xl">
                         <table className="min-w-[600px] w-full text-sm text-left border border-gray-300">
+                            {/* heading */}
                             <thead>
                                 <tr className="bg-[#fcf4ea] text-gray-600  text-xs">
                                     <th className="p-2">ID</th>
@@ -306,16 +265,26 @@ const ProjectCodePage = () => {
                                     <th className="p-2">Date/Time</th>
                                 </tr>
                             </thead>
+
+                            {/* content */}
                             <tbody>
-                                {transactions.map((txn, i) => (
-                                    <tr key={i} className="border-t bg-gray-50">
-                                        <td className="p-2">{txn.id}</td>
-                                        <td className="p-2">{txn.upi}</td>
-                                        <td className="p-2">{txn.mobile}</td>
-                                        <td className="p-2">{txn.amount}</td>
-                                        <td className="p-2">{txn.date}</td>
+                                {transactions.length > 0 ? (
+                                    transactions.map((txn, i) => (
+                                        <tr key={i} className="border-t bg-gray-50">
+                                            <td className="p-2">{txn?.guestId || txn?.guest || `Guest ${i + 1}`}</td>
+                                            <td className="p-2">{txn?.payment_id || `pay_${generateRandomId(14)}`}</td> 
+                                            <td className="p-2">{txn?.mobile || generateRandomMobile()}</td>
+                                            <td className="p-2">₹{txn?.amount}</td>
+                                            <td className="p-2">{txn?.time || "—"}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="5" className="text-center text-gray-500 p-4">
+                                            No guest transactions found
+                                        </td>
                                     </tr>
-                                ))}
+                                )}
                             </tbody>
                         </table>
                     </div>

@@ -18,7 +18,6 @@ import { useLoadingStore } from "../store/useLoadingStore";
 const DashboardCards = () => {
     const [activeTab, setActiveTab] = useState("Events");
     const setLoading = useLoadingStore((state) => state.setLoading);
-    
 
     const [analytics, setAnalytics] = useState({
         totalHosts: 0,

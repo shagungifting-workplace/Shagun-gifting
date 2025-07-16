@@ -5,6 +5,7 @@ import { auth, db } from "../utils/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { setDoc, doc, serverTimestamp, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast';
 
 export default function Sign_login() {
     const [isLogin, setIsLogin] = useState(true);
@@ -69,16 +70,19 @@ export default function Sign_login() {
                     console.log(docSnap)
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        if(data.isComplete === true){
-                            alert("Login successful!");
+                        if(data?.isComplete === true){
+                            toast.success("Login successful!", {
+                                duration: 3000,
+                                position: "top-center",
+                            })
                             navigate("/host_dash");
                         } else {
-                            alert("Please do complete your payment first.");
+                            toast.error("Please do complete your payment first.");
                             navigate("/budget_bank");
                             return;
                         }
                     } else{
-                        alert("Please complete your registraion !");
+                        toast.error("Please complete your registraion !");
                         navigate("/mobile_ver");
                         return;
                     }
@@ -105,12 +109,15 @@ export default function Sign_login() {
                     registeredAt: serverTimestamp()  // Just one small field
                 }, { merge: true });
 
-                alert("Account created successfully!");
+                toast.success("Account created successfully!",{
+                    duration: 3000,
+                    position: "top-center",
+                });
                 navigate("/mobile_ver");
             }
         } catch (error) {
             console.error("Auth error:", error);
-            alert(error.message || "Authentication failed.");
+            toast.error(error.message || "Authentication failed.");
         } finally {
             setLoading(false);
         }

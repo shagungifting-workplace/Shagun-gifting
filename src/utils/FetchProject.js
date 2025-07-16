@@ -14,17 +14,24 @@ export const fetchAllProjects = async () => {
         const eventRef = doc(db, `users/${uid}/eventDetails/info`);
         const budgetRef = doc(db, `users/${uid}/eventDetails/budget`);
         const personalRef = doc(db, `users/${uid}/personalDetails/info`);
+        const guestRef = collection(db, "users", uid, "eventDetails", "info", "guests");
 
-        const [eventSnap, budgetSnap, personalSnap] = await Promise.all([
+        const [eventSnap, budgetSnap, personalSnap, guestSnap] = await Promise.all([
             getDoc(eventRef),
             getDoc(budgetRef),
             getDoc(personalRef),
+            getDocs(guestRef),
         ]);
 
         if (eventSnap.exists() && budgetSnap.exists() && personalSnap.exists()) {
             const eventData = eventSnap.data();
             const budgetData = budgetSnap.data();
             const personalData = personalSnap.data();
+
+            const guests = guestSnap.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
 
             const project = {
                 uid: uid,
@@ -66,6 +73,8 @@ export const fetchAllProjects = async () => {
                 phone: personalData.phone || "",
                 side: personalData.side || "",
                 heroName: personalData.heroName || "",
+
+                guests,
                 
             };
 

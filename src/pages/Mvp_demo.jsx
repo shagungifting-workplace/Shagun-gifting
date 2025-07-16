@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { auth, db } from "../utils/firebase";
+import { collection, addDoc, serverTimestamp, doc, setDoc, getDocs } from "firebase/firestore";
+import toast from 'react-hot-toast';
 
 const Mvp_demo = () => {
     const [transactions, setTransactions] = useState([]);
@@ -6,7 +9,7 @@ const Mvp_demo = () => {
     const [totalAmount, setTotalAmount] = useState(0);
     const [envelopesUsed, setEnvelopesUsed] = useState(0);
     const [notification, setNotification] = useState(null);
-    const [isProcessing, setIsProcessing] = useState(false);
+    const razorpay_key = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
     const handleInputChange = (e) => {
         const value = e.target.value;
@@ -22,62 +25,113 @@ const Mvp_demo = () => {
         }, 4000);
     };
 
-    const handlePay = () => {
-        if (!amount || parseInt(amount) <= 0) return;
-        setIsProcessing(true);
+    const handlePay = async () => {
+        if (!amount || parseInt(amount) <= 0) {
+            toast.error("Please enter a valid amount");
+            return;
+        }
 
-        setTimeout(() => {
-            const envelope = Math.floor(Math.random() * 200) + 1;
-            const newTransaction = {
-                guest: `Guest ${transactions.length + 1}`,
-                envelope,
-                amount: parseInt(amount),
-                time: new Date().toLocaleTimeString(),
-            };
+        const amt = parseInt(amount);
+        const user = auth.currentUser;
+        if (!user) {
+            toast.error("User not logged in");
+            return;
+        }
 
-            setTransactions([newTransaction, ...transactions]);
-            setTotalAmount(prev => prev + parseInt(amount));
-            setEnvelopesUsed(prev => prev + 1);
-            showNotification(envelope, amount);
-            setAmount('');
-            setIsProcessing(false);
-        }, 500);
+        const options = {
+            key: razorpay_key, 
+            amount: amt * 100,
+            currency: "INR",
+            name: "Shagun Guest Payment",
+            description: "Envelope Payment",
+            handler: async function (response) {
+                try {
+                    const newTransaction = {
+                        guest: `Guest ${transactions.length + 1}`,
+                        envelope: `${transactions.length + 1}`,
+                        amount: amt,
+                        time: new Date().toLocaleTimeString(),
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        timestamp: serverTimestamp(),
+                    };
+
+                    // Store transaction in guest subcollection
+                    const guestData = {
+                        guestId: `Guest ${transactions.length + 1}`,
+                        name: `Guest ${transactions.length + 1}`, 
+                        envelope: `${transactions.length + 1}`,
+                        amount: parseInt(amount),     
+                        payment_id: response.razorpay_payment_id,           
+                        time: new Date().toLocaleTimeString(),
+                        timestamp: serverTimestamp()
+                    };
+                    await addDoc( collection(db, `users/${user.uid}/eventDetails/info/guests`), guestData);
+
+                    // Update distributed and guestRevenue in info
+                    const infoRef = doc(db, `users/${user.uid}/eventDetails/info`);
+                    await setDoc(infoRef, {
+                        distributed: envelopesUsed + 1,
+                        guestRevenue: totalAmount + amt
+                    }, { merge: true });
+
+                    setTransactions([newTransaction, ...transactions]);
+                    setTotalAmount(prev => prev + amt);
+                    setEnvelopesUsed(prev => prev + 1);
+                    showNotification(`${transactions.length + 1}`, amt);
+                    setAmount('');
+                    toast.success("Payment Successful!");
+                } catch (error) {
+                    console.error("Payment success handler error:", error);
+                    toast.error("Something went wrong saving transaction.");
+                }
+            },
+            prefill: {
+                name: "Guest",
+            },
+            theme: {
+                color: "#f45b0b"
+            }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
     };
 
-    const handleReset = () => {
-        setTransactions([]);
-        setTotalAmount(0);
-        setEnvelopesUsed(0);
-        setAmount('');
-    };
+    useEffect(() => {
+        const fetchGuestTransactions = async () => {
+            const user = auth.currentUser;
+            if (!user) return;
 
-    const generateRandomAmount = () => {
-        const options = [101, 501, 1001, 556, 5560];
-        return options[Math.floor(Math.random() * options.length)];
-    };
+            try {
+                const guestsRef = collection(db, `users/${user.uid}/eventDetails/info/guests`);
+                const snapshot = await getDocs(guestsRef);
+                const guestTransactions = [];
 
-    const handleGenerateTransactions = () => {
-        const generated = Array.from({ length: 15 }, (_, i) => {
-            const envelope = Math.floor(Math.random() * 200) + 1;
-            return {
-                guest: `Guest ${transactions.length + i + 1}`,
-                envelope,
-                amount: generateRandomAmount(),
-                time: new Date().toLocaleTimeString(),
-            };
-        });
+                let total = 0;
 
-        setTransactions(prev => [...generated, ...prev]);
-        setTotalAmount(prev =>
-            prev + generated.reduce((sum, t) => sum + t.amount, 0)
-        );
-        setEnvelopesUsed(prev => prev + 15);
-    };
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    guestTransactions.push({
+                        guest: data.name || "Guest",
+                        envelope: data.envelope || "—",
+                        amount: data.amount || 0,
+                        time: data.time || "",
+                    });
+                    total += data.amount || 0;
+                });
 
-    const avgAmount =
-        transactions.length > 0
-            ? Math.floor(totalAmount / transactions.length)
-            : 0;
+                setTransactions(guestTransactions.reverse()); // Most recent on top
+                setTotalAmount(total);
+                setEnvelopesUsed(guestTransactions.length);
+            } catch (err) {
+                console.error("Error fetching guest transactions:", err);
+            }
+        };
+
+        fetchGuestTransactions();
+    }, []);
+
+    const avgAmount = transactions.length > 0 ? Math.floor(totalAmount / transactions.length) : 0;
 
     return (
         <div className="font-sans p-8 bg-[#fff6f1] min-h-screen" id="mvp-demo">
@@ -142,27 +196,9 @@ const Mvp_demo = () => {
                         />
                         <button
                             onClick={handlePay}
-                            disabled={isProcessing}
-                            className={`w-full py-2 rounded-md text-white font-semibold ${
-                                isProcessing ? 'bg-gray-400' : 'bg-[#0aaf60] hover:bg-green-700'
-                            }`}
+                            className="w-full py-2 rounded-md text-white font-semibold bg-[#0aaf60] hover:bg-green-700"
                         >
-                            {isProcessing ? 'Processing...' : 'Pay & Get Envelope'}
-                        </button>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 justify-between mb-4">
-                        <button
-                            onClick={handleGenerateTransactions}
-                            className="flex-1 border border-gray-300 rounded-md px-3 py-2 font-semibold text-sm hover:bg-gray-100"
-                        >
-                            Generate 15 Test Transactions
-                        </button>
-                        <button
-                            onClick={handleReset}
-                            className="flex-1 border border-gray-300 rounded-md px-3 py-2 font-semibold text-sm hover:bg-gray-100"
-                        >
-                            Reset Demo
+                            Pay & Get Envelope
                         </button>
                     </div>
 
