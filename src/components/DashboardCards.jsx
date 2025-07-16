@@ -13,9 +13,12 @@ import { Link } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../utils/firebase";
+import { useLoadingStore } from "../store/useLoadingStore";
 
 const DashboardCards = () => {
     const [activeTab, setActiveTab] = useState("Events");
+    const setLoading = useLoadingStore((state) => state.setLoading);
+    
 
     const [analytics, setAnalytics] = useState({
         totalHosts: 0,
@@ -33,10 +36,11 @@ const DashboardCards = () => {
                 console.warn("User not logged in");
                 return;
             }
-
+            
             const uid = user.uid;
             console.log("uid from admin:", uid);
-        
+            
+            setLoading(true);
             try {
                 const usersSnapshot = await getDocs(collection(db, "users"));
                 const userDocs = usersSnapshot.docs;
@@ -83,14 +87,16 @@ const DashboardCards = () => {
                     totalBudget,
                     totalServiceFee
                 });
-
+                
             } catch (error) {
                 console.error("Error Fetching Analytics:", error);
+            } finally {
+                setLoading(false);
             }
         });
     
         return () => fetchAnalytics(); // Clean up the listener on unmount
-    }, []);
+    }, [setLoading]);
 
     return (
         <div className="p-4 sm:px-6 lg:px-20 bg-[#fef4ec] min-h-screen">

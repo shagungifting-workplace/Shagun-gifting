@@ -3,61 +3,102 @@ import { Link } from "react-router-dom";
 import { IoSearch } from "react-icons/io5";
 import { db } from "../utils/firebase";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { useLoadingStore } from "../store/useLoadingStore";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 
 const ActiveEvents = () => {
     const [projects, setProjects] = useState([]);
+    const setLoading = useLoadingStore((state) => state.setLoading);
 
     useEffect(() => {
         const fetchProjects = async () => {
-            const usersRef = collection(db, "users");
-            const usersSnapshot = await getDocs(usersRef);
-            const projects = [];
+            setLoading(true);
+            try {
+                const usersRef = collection(db, "users");
+                const usersSnapshot = await getDocs(usersRef);
+                const projects = [];
 
-            for (const userDoc of usersSnapshot.docs) {
-                const uid = userDoc.id;
-                const eventInfoRef = doc(db, `users/${uid}/eventDetails/info`);
-                const eventSnap = await getDoc(eventInfoRef);
+                for (const userDoc of usersSnapshot.docs) {
+                    const uid = userDoc.id;
+                    const eventInfoRef = doc(db, `users/${uid}/eventDetails/info`);
+                    const eventSnap = await getDoc(eventInfoRef);
 
-                const personalInfoRef = doc(db, `users/${uid}/personalDetails/info`);
-                const personalSnap = await getDoc(personalInfoRef);
+                    const personalInfoRef = doc(db, `users/${uid}/personalDetails/info`);
+                    const personalSnap = await getDoc(personalInfoRef);
 
-                const budgetInfoRef = doc(db, `users/${uid}/eventDetails/budget`);
-                const budgetSnap = await getDoc(budgetInfoRef);
+                    const budgetInfoRef = doc(db, `users/${uid}/eventDetails/budget`);
+                    const budgetSnap = await getDoc(budgetInfoRef);
 
-                if (eventSnap.exists()) {
-                    const data = eventSnap.data();
-                    const data2 = personalSnap.data();
-                    const budgetData = budgetSnap.data();
+                    if (eventSnap.exists()) {
+                        const data = eventSnap.data();
+                        const data2 = personalSnap.data();
+                        const budgetData = budgetSnap.data();
 
-                    // Do your logic (e.g., derive status)
-                    projects.push({
-                        code: data.projectCode,
-                        host: data2.fullName || "Unknown",
-                        eventDate: data.eventDate,
-                        startTime: data.startTime,
-                        envelope: budgetData.members,
-                        distributed: data.distributed || 0,
-                        status: data.status || "Running",
-                        refund: data.refund || 0,
-                        iot: data.iot || "Working",
-                    });
+                        // Do your logic (e.g., derive status)
+                        projects.push({
+                            code: data.projectCode,
+                            host: data2.fullName || "Unknown",
+                            eventDate: data.eventDate,
+                            startTime: data.startTime,
+                            envelope: budgetData.members,
+                            distributed: data.distributed || 0,
+                            status: data.status || "Running",
+                            refund: data.refund || 0,
+                            iot: data.iot || "Working",
+                        });
+                    }
+
                 }
 
+                setProjects(projects);
+                console.log("Projects fetched:", projects);
+                return projects;
+            }  catch (error) {
+                console.error("Error fetching projects:", error);
+            } finally {
+                setLoading(false);
             }
-            // Set the projects state
-            setProjects(projects);
-            console.log("Projects fetched:", projects);
-            return projects;
         };
         fetchProjects()
-    }, []);
+    }, [setLoading]);
+
+    const handleDownload = () => {
+        const exportData = projects.map((proj) => ({
+            "Project Code": proj.code,
+            "Host": proj.host,
+            "Envelopes Distributed": `${proj.distributed}/${proj.envelope}`,
+            "Status": proj.status,
+            "Refund": proj.refund,
+            "IoT Machine": proj.iot,
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Projects");
+
+        const excelBuffer = XLSX.write(workbook, {
+            bookType: "xlsx",
+            type: "array",
+        });
+
+        const blob = new Blob([excelBuffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+
+        saveAs(blob, `Shagun_Projects_Report_${Date.now()}.xlsx`);
+    };
 
     return (
         <div className="bg-[#fdf6ed] min-h-screen p-6">
             {/* Header */}
             <div className="flex justify-between items-center bg-[#4a0f23] rounded-t-lg p-4">
                 <h1 className="text-2xl font-bold text-[#ccbf95]">SHAGUN</h1>
-                <button className="bg-[#ccbf95] text-[#4a0f23] px-4 py-2 rounded-md hover:bg-yellow-700">
+                <button
+                    onClick={handleDownload}
+                    className="bg-[#ccbf95] text-[#4a0f23] px-4 py-2 rounded-md hover:bg-yellow-700"
+                >
                     Download Report
                 </button>
             </div>

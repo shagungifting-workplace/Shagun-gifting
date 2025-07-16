@@ -97,6 +97,7 @@ export default function Sign_login() {
                     uid: uid,
                     fullName: formData.fullName,
                     email: formData.email,
+                    role: "host",
                     createdAt: serverTimestamp(),
                 });
 

@@ -77,6 +77,7 @@ export default function Admin_Sign_Login() {
                     uid: uid,
                     fullName: formData.fullName,
                     email: formData.email,
+                    role: "admin",
                     createdAt: serverTimestamp(),
                 });
 

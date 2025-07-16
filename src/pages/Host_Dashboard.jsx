@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { auth, db } from "../utils/firebase";
 import { collection, getDocs, setDoc, doc, getDoc, serverTimestamp, } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { useLoadingStore } from "../store/useLoadingStore";
 
 const Host_Dashboard = () => {
     const [showAll, setShowAll] = useState(false);
@@ -17,6 +18,7 @@ const Host_Dashboard = () => {
     const [rechargeSuccess, setRechargeSuccess] = useState(false);
 
     console.log("set", setTransactions) // Placeholder if you integrate later
+    const setLoading = useLoadingStore((state) => state.setLoading);
 
     const totalAmount = transactions.reduce((sum, txn) => sum + txn.amount, 0);
     const totalTransactions = transactions.length;
@@ -28,6 +30,7 @@ const Host_Dashboard = () => {
             if (user) {
                 const uid = user.uid;
 
+                setLoading(true);
                 try {
                     // Fetch Host Name
                     const personalRef = doc(db, `users/${uid}/personalDetails/info`);
@@ -62,6 +65,8 @@ const Host_Dashboard = () => {
 
                 } catch (error) {
                     console.error("Error fetching dashboard data:", error);
+                }finally {
+                    setLoading(false);
                 }
             } else {
                 console.warn("User not logged in");
@@ -69,7 +74,7 @@ const Host_Dashboard = () => {
         });
 
         return () => unsubscribe(); // Clean up the listener on unmount
-    }, []);
+    }, [setLoading]);
 
     const handleEnvelopeRecharge = async () => {
         const user = auth.currentUser;
