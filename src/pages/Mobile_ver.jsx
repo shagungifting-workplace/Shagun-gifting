@@ -1,4 +1,4 @@
-import { useState, useEffect  } from "react";
+import { useState } from "react";
 import { FaArrowLeft, FaCheck, FaGift } from "react-icons/fa";
 import giftIcon from "./../assets/react.svg"; // Replace with actual gift icon
 import phoneIcon from "./../assets/react.svg";
@@ -17,24 +17,6 @@ export default function Mobile_ver() {
     const navigate = useNavigate();
     auth.languageCode = 'it';
 
-    useEffect(() => {
-        if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'send-otp-btn', {
-                'size': 'invisible',
-                'callback': (response) => {
-                    console.log("reCAPTCHA solved, allow OTP to proceed.", response);
-                },
-                'expired-callback': () => {
-                    console.warn("reCAPTCHA expired. Please refresh.");
-                }
-            });
-
-            window.recaptchaVerifier.render().then(widgetId => {
-                window.recaptchaWidgetId = widgetId;
-            });
-        }
-    }, []);
-
     const handleSendOtp = async () => {
         if (phone.length !== 10) {
             alert("Please enter a valid 10-digit phone number.");
@@ -49,11 +31,12 @@ export default function Mobile_ver() {
                 alert("User not signed in.");
                 setLoading(false);
                 return;
-            }
+            } 
+            console.log("Current user:", currentUser);
 
             if (!window.recaptchaVerifier) {
                 window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                    'size': 'normal',
+                    'size': 'invisible',
                     'callback': (response) => {
                         console.log("reCAPTCHA solved", response);
                     },
@@ -63,6 +46,8 @@ export default function Mobile_ver() {
                 });
 
                 await window.recaptchaVerifier.render();
+            } else {
+                console.log("reCAPTCHA already initialized.");
             }
 
             const appVerifier = window.recaptchaVerifier;
@@ -74,6 +59,12 @@ export default function Mobile_ver() {
         } catch (error) {
             console.error("Error sending OTP:", error);
             alert("Failed to send OTP. Try again.");
+            
+            if (error.code === "auth/too-many-requests") {
+                alert("Too many attempts. Please wait before trying again.");
+            } else {
+                alert("OTP sending failed. Try again.");
+            }
 
             if (window.recaptchaVerifier) {
                 window.recaptchaVerifier.clear();

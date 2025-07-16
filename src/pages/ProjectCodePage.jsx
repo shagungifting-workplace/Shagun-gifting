@@ -56,7 +56,6 @@ const ProjectCodePage = () => {
         return number;
     };
 
-    console.log(projects)
     const transactions = projects?.guests || [];
     
     return (
