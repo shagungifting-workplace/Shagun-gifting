@@ -17,6 +17,7 @@ import ActiveEvents from "./pages/ActiveEvents.jsx";
 import ProjectCodePage from "./pages/ProjectCodePage.jsx";
 import Host_Dashboard from "./pages/Host_Dashboard.jsx";
 import Admin_Sign_Login from "./pages/Admin_login_signup.jsx";
+import GlobalLoader from './components/GlobalLoader';
 
 function AppContent() {
     const location = useLocation();
@@ -39,7 +40,8 @@ function AppContent() {
     return (
         <>
             {!hideLayout && <Navbar />}
-
+            <GlobalLoader />
+            
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/admin" element={<AdminDashboard />} />

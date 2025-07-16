@@ -22,6 +22,7 @@ const DashboardCards = () => {
         totalEvents: 0,
         totalEnvelopes: 0,
         totalBudget: 0,
+        totalServiceFee: 0,
     });
 
     const tabs = [ "Events", "IoT Machines", "Payments", "Hosts", "Agents", "Analytics", ];
@@ -45,6 +46,7 @@ const DashboardCards = () => {
                 let totalEvents = 0;
                 let totalEnvelopes = 0;
                 let totalBudget = 0;
+                let totalServiceFee = 0;
 
                 for (const userDoc of userDocs) {
                     const uid = userDoc.id;
@@ -69,6 +71,7 @@ const DashboardCards = () => {
                         if (budgetData.members) {
                             totalEnvelopes += parseInt(budgetData.members);
                             totalBudget += parseFloat(budgetData.amount || 0);
+                            totalServiceFee += parseFloat(budgetData.platformFee || 0);
                         }
                     }
                 }
@@ -77,8 +80,10 @@ const DashboardCards = () => {
                     totalHosts,
                     totalEvents,
                     totalEnvelopes,
-                    totalBudget
+                    totalBudget,
+                    totalServiceFee
                 });
+
             } catch (error) {
                 console.error("Error Fetching Analytics:", error);
             }
@@ -113,19 +118,23 @@ const DashboardCards = () => {
 
             {/* Dashboard Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-10">
-                <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500">
-                    <div className="flex justify-between items-center">
-                        <p className="text-sm text-gray-600 font-semibold">
-                            Total Hosts
+                {/* Total Hosts */}
+                <Link to="/active-events">
+                    <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500 hover:shadow-md transition">
+                        <div className="flex justify-between items-center">
+                            <p className="text-sm text-gray-600 font-semibold">
+                                Total Hosts
+                            </p>
+                            <MdOutlinePeopleOutline className="text-xl text-blue-500" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-black">{analytics.totalHosts}</h2>
+                        <p className="text-sm text-gray-500">
+                            +180 from last month
                         </p>
-                        <MdOutlinePeopleOutline className="text-xl text-blue-500" />
                     </div>
-                    <h2 className="text-2xl font-bold text-black">{analytics.totalHosts}</h2>
-                    <p className="text-sm text-gray-500">
-                        +180 from last month
-                    </p>
-                </div>
+                </Link>
 
+                {/* Active Events */}
                 <Link to="/active-events">
                     <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-green-500 cursor-pointer hover:shadow-md transition">
                         <div className="flex justify-between items-center">
@@ -141,6 +150,7 @@ const DashboardCards = () => {
                     </div>
                 </Link>
 
+                {/* Machines Online */}
                 <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-orange-500">
                     <div className="flex justify-between items-center">
                         <p className="text-sm text-gray-600 font-semibold">
@@ -152,6 +162,7 @@ const DashboardCards = () => {
                     <p className="text-sm text-gray-500">93.3% uptime</p>
                 </div>
 
+                {/* Today's Revenue */}
                 <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-purple-500">
                     <div className="flex justify-between items-center">
                         <p className="text-sm text-gray-600 font-semibold">
@@ -163,6 +174,7 @@ const DashboardCards = () => {
                     <p className="text-sm text-gray-500">+12% from yesterday</p>
                 </div>
 
+                {/* Total Envelopes */}
                 <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-indigo-500">
                     <div className="flex justify-between items-center">
                         <p className="text-sm text-gray-600 font-semibold">
@@ -193,7 +205,7 @@ const DashboardCards = () => {
                         Today's Service Fees
                     </h3>
                     <p className="text-2xl font-bold text-indigo-600">
-                        ₹18,750
+                        {analytics?.totalServiceFee?.toLocaleString()}
                     </p>
                     <p className="text-gray-500 mt-1">
                         Total fees collected today
@@ -231,3 +243,7 @@ const DashboardCards = () => {
     );
 };
 export default DashboardCards;
+
+
+
+    
