@@ -3,31 +3,40 @@ import { useParams } from "react-router-dom";
 import { IoIosArrowDown } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { fetchAllProjects } from ".././utils/FetchProject";
+import { useLoadingStore } from "../store/useLoadingStore";
 
 const ProjectCodePage = () => {
     const { code } = useParams();
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+    const setLoading = useLoadingStore((state) => state.setLoading);
     const [projects, setProjects] = useState(null);
 
     useEffect(() => {
         const getProjectByCode = async () => {
-            const allProjects = await fetchAllProjects();
-            const matchedProject = allProjects.find(p => p.projectCode === code);
-            if (matchedProject) {
-                matchedProject.guests = [...(matchedProject.guests || [])].sort(
-                    (a, b) => parseInt(b.envelope) - parseInt(a.envelope)
-                );
-                setProjects(matchedProject);
-            } else {
-                console.warn("Project not found for code:", code);
-                setProjects(null);
+            setLoading(true);
+            try{
+                const allProjects = await fetchAllProjects();
+                const matchedProject = allProjects.find(p => p.projectCode === code);
+                if (matchedProject) {
+                    matchedProject.guests = [...(matchedProject.guests || [])].sort(
+                        (a, b) => parseInt(b.envelope) - parseInt(a.envelope)
+                    );
+                    setProjects(matchedProject);
+                } else {
+                    console.warn("Project not found for code:", code);
+                    setProjects(null);
+                }
+            } catch (error) {
+                console.error("Error fetching project by code:", error);
+            } finally {
+                setLoading(false);
             }
         };
 
         if (code) getProjectByCode();
-    }, [code]);
+    }, [code, setLoading]);
 
     const generateRandomId = (length = 14) => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
