@@ -18,6 +18,7 @@ import ProjectCodePage from "./pages/ProjectCodePage.jsx";
 import Host_Dashboard from "./pages/Host_Dashboard.jsx";
 import Admin_Sign_Login from "./pages/Admin_login_signup.jsx";
 import GlobalLoader from './components/GlobalLoader';
+import PrivacyPolicy from "./pages/PrivacyPolicy.jsx"
 
 function AppContent() {
     const location = useLocation();
@@ -31,6 +32,7 @@ function AppContent() {
         "/budget_bank",
         "/reg_com",
         "/active-events",
+        "/privacy-policy"
     ];
 
     const hideLayout =
@@ -56,6 +58,7 @@ function AppContent() {
                 <Route path="/host_dash" element={<Host_Dashboard />} />
                 <Route path="/active-events" element={<ActiveEvents />} />
                 <Route path="/project/:code" element={<ProjectCodePage />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route
                     path="*"
                     element={

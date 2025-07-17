@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaArrowLeft, FaCheck, FaGift } from "react-icons/fa";
 import giftIcon from "./../assets/react.svg"; // Replace with actual gift icon
 import phoneIcon from "./../assets/react.svg";
@@ -15,7 +15,10 @@ export default function Mobile_ver() {
     const [confirmationResult, setConfirmationResult] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    auth.languageCode = 'it';
+
+    useEffect(() => {
+        auth.languageCode = 'en'; 
+    }, []);
 
     const handleSendOtp = async () => {
         if (phone.length !== 10) {
@@ -53,13 +56,14 @@ export default function Mobile_ver() {
             const appVerifier = window.recaptchaVerifier;
 
             const result = await linkWithPhoneNumber(currentUser, `+91${phone}`, appVerifier);
+            console.log("Result: ", result);
             setConfirmationResult(result);
             window.confirmationResult = result;
             alert("OTP sent successfully!");
         } catch (error) {
             console.error("Error sending OTP:", error);
             alert("Failed to send OTP. Try again.");
-            
+
             if (error.code === "auth/too-many-requests") {
                 alert("Too many attempts. Please wait before trying again.");
             } else {

@@ -4,8 +4,8 @@ import { FaRegChartBar } from "react-icons/fa";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../utils/firebase";
-// import { db  } from "../utils/firebase";
-// import { doc, getDoc } from "firebase/firestore";
+import { db  } from "../utils/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import shagunIcon from "../assets/shagunicon.png";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -15,40 +15,40 @@ const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
 
-    // const [role, setRole] = useState(null);
+    const [role, setRole] = useState(null);
 
-    // useEffect(() => {
-    //     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-    //         if (user) {
-    //             setIsLoggedIn(true);
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                setIsLoggedIn(true);
 
-    //             // 🧠 Try host path
-    //             let roleData = null;
-    //             const personalRef = doc(db, `users/${user.uid}/personalDetails/info`);
-    //             const personalSnap = await getDoc(personalRef);
+                // 🧠 Try host path
+                let roleData = null;
+                const personalRef = doc(db, `users/${user.uid}/personalDetails/info`);
+                const personalSnap = await getDoc(personalRef);
 
-    //             if (personalSnap.exists()) {
-    //                 roleData = personalSnap.data();
-    //             } else {
-    //                 // 🧠 Try admin path
-    //                 const adminRef = doc(db, `admins/${user.uid}/info`);
-    //                 const adminSnap = await getDoc(adminRef);
-    //                 if (adminSnap.exists()) {
-    //                     roleData = adminSnap.data();
-    //                 }
-    //             }
+                if (personalSnap.exists()) {
+                    roleData = personalSnap.data();
+                    setRole("host");
+                } else {
+                    // 🧠 Try admin path
+                    const adminRef = doc(db, `admin/${user.uid}/adminDetails/info`);
+                    const adminSnap = await getDoc(adminRef);
+                    if (adminSnap.exists()) {
+                        roleData = adminSnap.data() ;
+                        setRole("admin")
+                    }
+                }
+                console.log("roledata", roleData);
+                // setRole(roleData.role );
+            } else {
+                setIsLoggedIn(false);
+                setRole(null);
+            }
+        });
 
-    //             setRole(roleData?.role || null);
-    //         } else {
-    //             setIsLoggedIn(false);
-    //             setRole(null);
-    //         }
-    //     });
-
-    //     return () => unsubscribe();
-    // }, []);
-
-    const role = "admin"; 
+        return () => unsubscribe();
+    }, []);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -69,6 +69,7 @@ const Navbar = () => {
     };
 
     const handleDashboard = () => {
+        console.log("role:", role);
         if (role === "admin") {
             navigate("/admin");
         } else if (role === "host") {
@@ -104,7 +105,7 @@ const Navbar = () => {
                             <li>
                                 <Link to="/adminAuth">
                                     <button className="py-2 px-4 border border-gray-300 rounded-xl flex items-center gap-2">
-                                        <FaRegChartBar size={20} />
+                                        <MdOutlinePeople size={20} />
                                         Admin Login
                                     </button>
                                 </Link>
@@ -154,9 +155,9 @@ const Navbar = () => {
                                     Host Login
                                 </button>
                             </Link>
-                            <Link to="/adminlogin">
+                            <Link to="/adminAuth">
                                 <button className="w-full py-2 px-4 border border-gray-300 rounded-md flex items-center gap-2 justify-center">
-                                    <FaRegChartBar size={20} />
+                                    <MdOutlinePeople size={20} />
                                     Admin Login
                                 </button>
                             </Link>
