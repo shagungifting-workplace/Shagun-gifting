@@ -9,7 +9,7 @@ import Payments from "./dashboardtabs/Payments";
 import Hosts from "./dashboardtabs/Hosts";
 import Agents from "./dashboardtabs/Agents";
 import Analytics from "./dashboardtabs/Analytics";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../utils/firebase";
@@ -18,6 +18,7 @@ import { useLoadingStore } from "../store/useLoadingStore";
 const DashboardCards = () => {
     const [activeTab, setActiveTab] = useState("Events");
     const setLoading = useLoadingStore((state) => state.setLoading);
+    const navigate = useNavigate();
 
     const [analytics, setAnalytics] = useState({
         totalHosts: 0,
@@ -111,6 +112,9 @@ const DashboardCards = () => {
                         </p>
                     </div>
                     <div className="flex gap-2">
+                        <button onClick={() => navigate("changepassword")} className="bg-pink-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-pink-700">
+                            Change Password
+                        </button>
                         <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700">
                             SMS Blast
                         </button>

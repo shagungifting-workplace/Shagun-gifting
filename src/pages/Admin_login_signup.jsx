@@ -1,34 +1,19 @@
 import { useState } from 'react';
 import logo from './../assets/shagunicon.png';
 import { Link } from 'react-router-dom';
-import { auth, db } from "../utils/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { setDoc, doc, serverTimestamp } from "firebase/firestore";
+import { auth } from "../utils/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 export default function Admin_Sign_Login() {
-    const [isLogin, setIsLogin] = useState(true);
-    const [formData, setFormData] = useState({
-        fullName: '',
-        email: '',
-        password: '',
-    });
+    const [formData, setFormData] = useState({ email: '', password: '' });
     const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleToggle = (mode) => {
-        setIsLogin(mode === 'login');
-        setFormData({ fullName: '', email: '', password: '' });
-        setErrors({});
-    };
-
     const validate = () => {
         const newErrors = {};
-        if (!isLogin && !formData.fullName.trim()) {
-            newErrors.fullName = 'Please enter your full name';
-        }
         if (!formData.email.trim()) {
             newErrors.email = 'Please enter your email';
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -53,35 +38,14 @@ export default function Admin_Sign_Login() {
         setLoading(true);
 
         try {
-            if (isLogin) {
-                // 🔐 Login existing user
-                const data = await signInWithEmailAndPassword(auth, formData.email, formData.password);
-                console.log("data from login:", data);
+            const data = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+            console.log("data from login:", data);
 
-                const uid = data.user.uid;
-                if (!uid) {
-                    throw new Error("User ID not found");
-                } else {
-                    alert("Login successful!");
-                    navigate("/admin");
-                }
-                
+            const uid = data.user.uid;
+            if (!uid) {
+                throw new Error("User ID not found");
             } else {
-                // Create user
-                const userCred = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-                const uid = userCred.user.uid;
-                console.log("uid from signup:", uid);
-
-                // Store user data under: users/{uid}/userDetails/info
-                await setDoc(doc(db, `admin/${uid}/adminDetails/info`), {
-                    uid: uid,
-                    fullName: formData.fullName,
-                    email: formData.email,
-                    role: "admin",
-                    createdAt: serverTimestamp(),
-                });
-
-                alert("Account created successfully!");
+                alert("Login successful!");
                 navigate("/admin");
             }
         } catch (error) {
@@ -106,53 +70,15 @@ export default function Admin_Sign_Login() {
 
             {/* Header */}
             <div className="text-center mb-4">
-                <h2 className="text-2xl font-bold">Admin Account</h2>
+                <h2 className="text-2xl font-bold">Admin Login</h2>
                 <p className="text-gray-600 text-sm">
-                    Login or create an account to manage your events
+                    Login to manage your events
                 </p>
             </div>
 
-            {/* Card */}
+            {/* Form */}
             <div className="bg-white max-w-md w-full px-6 py-8 rounded-xl shadow-lg text-center">
-                {/* Tabs */}
-                <div className="flex border border-gray-300 rounded-md overflow-hidden mb-6">
-                    <button
-                        className={`flex-1 py-2 text-sm font-medium ${
-                            isLogin ? 'bg-gray-100 font-semibold' : 'bg-gray-50'
-                        }`}
-                        onClick={() => handleToggle('login')}
-                    >
-                        ⇨ Login
-                    </button>
-
-                    <button
-                        className={`flex-1 py-2 text-sm font-medium ${
-                            !isLogin ? 'bg-gray-100 font-semibold' : 'bg-gray-50'
-                        }`}
-                        onClick={() => handleToggle('signup')}
-                    >
-                        👤 Sign Up
-                    </button>
-                </div>
-
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4 text-left">
-                    {/* full name */}
-                    {!isLogin && (
-                        <div>
-                            <input
-                                type="text"
-                                placeholder="Enter your full name"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                                value={formData.fullName}
-                                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                            />
-                            {errors.fullName && (
-                                <span className="text-red-600 text-xs">{errors.fullName}</span>
-                            )}
-                        </div>
-                    )}
-
                     {/* email */}
                     <div>   
                         <input
@@ -193,7 +119,7 @@ export default function Admin_Sign_Login() {
                         disabled={loading}
                         className="w-full bg-[#f36b1c] text-white py-2 rounded-md font-semibold hover:bg-[#e46010]"
                     >
-                        {loading ? "Processing..." : isLogin ? "Sign In" : "Create Account"}
+                        {loading ? "Loading..." : "Log In"}
                     </button>
                 </form>
             </div>

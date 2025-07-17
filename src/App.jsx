@@ -19,6 +19,7 @@ import Host_Dashboard from "./pages/Host_Dashboard.jsx";
 import Admin_Sign_Login from "./pages/Admin_login_signup.jsx";
 import GlobalLoader from './components/GlobalLoader';
 import PrivacyPolicy from "./pages/PrivacyPolicy.jsx"
+import AdminChangePassword from "./components/AdminChangePassword.jsx";
 
 function AppContent() {
     const location = useLocation();
@@ -32,7 +33,8 @@ function AppContent() {
         "/budget_bank",
         "/reg_com",
         "/active-events",
-        "/privacy-policy"
+        "/privacy-policy",
+        "/admin/changepassword",
     ];
 
     const hideLayout =
@@ -48,6 +50,7 @@ function AppContent() {
                 <Route path="/" element={<Home />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/adminAuth" element={<Admin_Sign_Login />} />
+                <Route path="/admin/changepassword" element={<AdminChangePassword />} />
                 <Route path="/mvp_demo" element={<Mvp_demo />} />
                 <Route path="/hostlogin" element={<Sign_login />} />
                 <Route path="/mobile_ver" element={<Mobile_ver />} />

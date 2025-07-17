@@ -94,7 +94,7 @@ export default function Mobile_ver() {
             console.log("User verified:", user);
 
             // Save user data in Firestore
-            await setDoc(doc(db, `users/${uid}/userDetails/info`), {
+            await setDoc(doc(db, `users/${uid}/personalDetails/info`), {
                 phone: user.phoneNumber,
                 email: email || user.email || null,
                 verifiedPhoneAt: serverTimestamp(),

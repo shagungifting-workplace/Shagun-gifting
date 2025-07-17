@@ -68,6 +68,20 @@ export default function Sign_login() {
                     const docRef = doc(db, `users/${uid}/eventDetails/budget`);
                     const docSnap = await getDoc(docRef);
                     console.log(docSnap)
+
+                    const personalDetailsRef = doc(db, `users/${uid}/personalDetails/info`);
+                    const personalDetailsSnap = await getDoc(personalDetailsRef);
+                    console.log(personalDetailsSnap)
+                    if(personalDetailsSnap.exists()) {
+                        const personalData = personalDetailsSnap.data();
+                        if(!personalData?.phone) {
+                            navigate("/mobile_ver");
+                            return;
+                        } else if(personalData?.phone) {
+                            navigate("/personal_det");
+                            return;
+                        }
+                    }
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         if(data?.isComplete === true){
@@ -76,9 +90,10 @@ export default function Sign_login() {
                                 position: "top-center",
                             })
                             navigate("/host_dash");
+                            return;
                         } else {
-                            toast.error("Please do complete your payment first.");
-                            navigate("/budget_bank");
+                            toast.error("Please do complete your registraion !");
+                            navigate("/personal_det");
                             return;
                         }
                     } else{
