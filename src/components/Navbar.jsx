@@ -15,41 +15,6 @@ const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
 
-    const [role, setRole] = useState(null);
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                setIsLoggedIn(true);
-
-                // 🧠 Try host path
-                let roleData = null;
-                const personalRef = doc(db, `users/${user.uid}/personalDetails/info`);
-                const personalSnap = await getDoc(personalRef);
-
-                if (personalSnap.exists()) {
-                    roleData = personalSnap.data();
-                    setRole("host");
-                } else {
-                    // 🧠 Try admin path
-                    const adminRef = doc(db, `admin/${user.uid}/adminDetails/info`);
-                    const adminSnap = await getDoc(adminRef);
-                    if (adminSnap.exists()) {
-                        roleData = adminSnap.data() ;
-                        setRole("admin")
-                    }
-                }
-                console.log("roledata", roleData);
-                // setRole(roleData.role );
-            } else {
-                setIsLoggedIn(false);
-                setRole(null);
-            }
-        });
-
-        return () => unsubscribe();
-    }, []);
-
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setIsLoggedIn(!!user);
@@ -68,14 +33,41 @@ const Navbar = () => {
         }
     };
 
-    const handleDashboard = () => {
-        console.log("role:", role);
-        if (role === "admin") {
+    const handleDashboard = async () => {
+        const user = auth.currentUser;
+        const uid = user?.uid;
+
+        if (!uid) {
+            toast.error("User not logged in.");
+            return;
+        }
+
+        const adminUID = import.meta.env.VITE_ADMIN_UID;
+        console.log(adminUID, uid);
+
+        if (uid == adminUID) {
+            console.log("Navigating to admin dashboard");
             navigate("/admin");
-        } else if (role === "host") {
-            navigate("/host_dash");
+            return;
+        } 
+
+        // Host case
+        const docRef = doc(db, `users/${uid}/eventDetails/budget`);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+
+            if (data?.isComplete === true) {
+                console.log("Navigating to host dashboard");
+                navigate("/host_dash");
+            } else {
+                toast.error("Please complete your registration!");
+                return;
+            }
         } else {
-            toast.error("Unknown role or not logged in");
+            toast.error("Please complete your registration as a host to show the dashboard!");
+            navigate("/hostlogin");
         }
     };
 

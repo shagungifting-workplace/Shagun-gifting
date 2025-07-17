@@ -63,7 +63,7 @@ const DashboardCards = () => {
                     }
 
                     // Check if eventDetails/info exists
-                    const eventSnap = await getDoc(doc(db, `users/${uid}/eventDetails/info`));
+                    const eventSnap = await getDoc(doc(db, `users/${uid}/eventDetails/payment`));
                     if (eventSnap.exists()) {
                         totalEvents += 1;
                     }

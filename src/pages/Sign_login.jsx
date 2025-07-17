@@ -72,16 +72,7 @@ export default function Sign_login() {
                     const personalDetailsRef = doc(db, `users/${uid}/personalDetails/info`);
                     const personalDetailsSnap = await getDoc(personalDetailsRef);
                     console.log(personalDetailsSnap)
-                    if(personalDetailsSnap.exists()) {
-                        const personalData = personalDetailsSnap.data();
-                        if(!personalData?.phone) {
-                            navigate("/mobile_ver");
-                            return;
-                        } else if(personalData?.phone) {
-                            navigate("/personal_det");
-                            return;
-                        }
-                    }
+                    
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         if(data?.isComplete === true){
@@ -96,7 +87,20 @@ export default function Sign_login() {
                             navigate("/personal_det");
                             return;
                         }
-                    } else{
+                    } 
+
+                    if(personalDetailsSnap.exists()) {
+                        const personalData = personalDetailsSnap.data();
+                        if(!personalData?.phone) {
+                            navigate("/mobile_ver");
+                            return;
+                        } else if(personalData?.phone) {
+                            navigate("/host_dash");
+                            return;
+                        }
+                    }
+
+                    else{
                         toast.error("Please complete your registraion !");
                         navigate("/mobile_ver");
                         return;
