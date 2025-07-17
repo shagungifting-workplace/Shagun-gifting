@@ -38,6 +38,7 @@ export default function Personal_det() {
                 const fileRef = ref(storage, `event_cards/${user.uid}/${Date.now()}_${selectedFile.name}`);
                 await uploadBytes(fileRef, selectedFile);
                 fileUrl = await getDownloadURL(fileRef);
+                console.log("fileUrl",fileUrl)
             }
 
             // Store data in Firestore
