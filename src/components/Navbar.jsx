@@ -140,7 +140,7 @@ const Navbar = () => {
             {menuOpen && (
                 <div className="md:hidden mt-4 space-y-4 px-4">
                     {!isLoggedIn ? (
-                        <>
+                        <div className="flex flex-col gap-4">
                             <Link to="/hostlogin">
                                 <button className="w-full py-2 px-4 border border-gray-300 rounded-md flex items-center gap-2 justify-center">
                                     <MdOutlinePeople size={20} />
@@ -153,7 +153,7 @@ const Navbar = () => {
                                     Admin Login
                                 </button>
                             </Link>
-                        </>
+                        </div>
                     ) : (
                         <button
                             onClick={handleLogout}
