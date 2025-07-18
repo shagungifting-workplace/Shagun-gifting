@@ -283,7 +283,7 @@ const ProjectCodePage = () => {
                                             <td className="p-2">{txn?.payment_id || `pay_${generateRandomId(14)}`}</td> 
                                             <td className="p-2">{txn?.mobile || generateRandomMobile()}</td>
                                             <td className="p-2">₹{txn?.amount}</td>
-                                            <td className="p-2">{txn?.time || "—"}</td>
+                                            <td className="p-2">{txn?.timestamp ? txn.timestamp.toDate().toLocaleString() : "—"}</td>
                                         </tr>
                                     ))
                                 ) : (

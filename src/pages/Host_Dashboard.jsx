@@ -370,8 +370,8 @@ const Host_Dashboard = () => {
                                                 <td className="p-2">{txn?.mobile || generateRandomMobile()}</td>
                                                 <td className="p-2">₹{txn?.amount ?? 0}</td>
                                                 <td className="p-2">{txn?.id ?? `TXN${index + 1}`}</td>
-                                                <td className="p-2">{txn?.date ?? "--"}</td>
-                                                <td className="p-2">{txn?.time ?? "--"}</td>
+                                                <td className="p-2">{txn?.timestamp ? txn.timestamp.toDate().toLocaleDateString() : "--"}</td>
+                                                <td className="p-2">{txn?.timestamp ? txn.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--"}</td>
                                                 <td className="p-2">{txn?.mode ?? "Online"}</td>
                                             </tr>
                                         ))
