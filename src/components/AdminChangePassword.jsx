@@ -26,6 +26,10 @@ export default function AdminChangePassword() {
         setLoading(true);
         const currentUser = auth.currentUser;
         console.log("currentUser: ", currentUser);
+        if(!currentUser) {
+            toast.error("You must be logged in to change your password.");
+            return;
+        }
 
         try {
             // Replace this with your backend/API call
