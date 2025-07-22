@@ -37,7 +37,7 @@ export default function AdminChangePassword() {
                 toast.error("Admin credentials not found.");
                 setLoading(false);
                 return;
-            }
+            }   
 
             const storedPassword = adminSnap.data().password;
 
