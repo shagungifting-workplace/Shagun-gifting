@@ -21,41 +21,36 @@ import GlobalLoader from './components/GlobalLoader';
 import PrivacyPolicy from "./pages/PrivacyPolicy.jsx"
 import AdminChangePassword from "./components/AdminChangePassword.jsx";
 
-
-import { useEffect, useState } from "react";
-import { getDoc, doc } from "firebase/firestore";
-import { auth, db } from "./utils/firebase";
-import ProtectedRoute from "./components/ProtectedRoute";
-
 function AppContent() {
     const location = useLocation();
 
-    const [isHostComplete, setIsHostComplete] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
+    // const [isHostComplete, setIsHostComplete] = useState(false);
+    // const [isAdmin, setIsAdmin] = useState(false);
 
-    useEffect(() => {
-        const checkUser = async () => {
-            const user = auth.currentUser;
+    // useEffect(() => {
+    //     const checkUser = async () => {
+    //         const user = auth.currentUser;
+    //         console.log("user from home",user);
 
-            if (!user) return;
+    //         if (!user) return;
 
-            // Check if UID matches Admin
-            const adminUid = import.meta.env.VITE_ADMIN_UID;
-            if (user.uid === adminUid) {
-                setIsAdmin(true);
-                return;
-            }
+    //         // Check if UID matches Admin
+    //         const adminUid = import.meta.env.VITE_ADMIN_UID;
+    //         if (user.uid === adminUid) {
+    //             setIsAdmin(true);
+    //             return;
+    //         }
 
-            // Check host registration completion
-            const docRef = doc(db, `users/${user.uid}/eventDetails/budget`);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists() && docSnap.data()?.isComplete === true) {
-                setIsHostComplete(true);
-            }
-        };
+    //         // Check host registration completion
+    //         const docRef = doc(db, `users/${user.uid}/eventDetails/budget`);
+    //         const docSnap = await getDoc(docRef);
+    //         if (docSnap.exists() && docSnap.data()?.isComplete === true) {
+    //             setIsHostComplete(true);
+    //         }
+    //     };
 
-        checkUser();
-    }, []);
+    //     checkUser();
+    // }, []);
 
     const hideLayoutRoutes = [
         "/admin",
@@ -84,18 +79,14 @@ function AppContent() {
                 <Route
                     path="/admin"
                     element={
-                        <ProtectedRoute condition={isAdmin} redirectTo="/">
                             <AdminDashboard />
-                        </ProtectedRoute>
                     }
                 />
                 <Route path="/adminAuth" element={<Admin_Sign_Login />} />
                 <Route
                     path="/admin/changepassword"
                     element={
-                        <ProtectedRoute condition={isAdmin} redirectTo="/">
                             <AdminChangePassword />
-                        </ProtectedRoute>
                     }
                 />
                 {/* <Route path="/mvp_demo" element={<Mvp_demo />} /> */}
@@ -109,25 +100,19 @@ function AppContent() {
                 <Route
                     path="/host_dash"
                     element={
-                        <ProtectedRoute condition={isHostComplete} redirectTo="/hostlogin">
                             <Host_Dashboard />
-                        </ProtectedRoute>
                     }
                 />
                 <Route
                     path="/active-events"
                     element={
-                        <ProtectedRoute condition={isAdmin} redirectTo="/adminAuth">
                             <ActiveEvents />
-                        </ProtectedRoute>
                     }
                 />
                 <Route
                     path="/project/:code"
                     element={
-                        <ProtectedRoute condition={isAdmin} redirectTo="/adminAuth">
                             <ProjectCodePage />
-                        </ProtectedRoute>
                     }
                 />
                 <Route
