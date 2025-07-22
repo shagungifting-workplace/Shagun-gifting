@@ -27,7 +27,6 @@ import { getDoc, doc } from "firebase/firestore";
 import { auth, db } from "./utils/firebase";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-
 function AppContent() {
     const location = useLocation();
 
@@ -57,7 +56,6 @@ function AppContent() {
 
         checkUser();
     }, []);
-
 
     const hideLayoutRoutes = [
         "/admin",
@@ -107,10 +105,11 @@ function AppContent() {
                 <Route path="/event_det" element={<Event_det />} />
                 <Route path="/budget_bank" element={<Budget_bank />} />
                 <Route path="/reg_com" element={<Reg_com />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route
                     path="/host_dash"
                     element={
-                        <ProtectedRoute condition={isHostComplete} redirectTo="/personal_det">
+                        <ProtectedRoute condition={isHostComplete} redirectTo="/hostlogin">
                             <Host_Dashboard />
                         </ProtectedRoute>
                     }
@@ -118,7 +117,7 @@ function AppContent() {
                 <Route
                     path="/active-events"
                     element={
-                        <ProtectedRoute condition={isHostComplete} redirectTo="/personal_det">
+                        <ProtectedRoute condition={isAdmin} redirectTo="/adminAuth">
                             <ActiveEvents />
                         </ProtectedRoute>
                     }
@@ -126,16 +125,8 @@ function AppContent() {
                 <Route
                     path="/project/:code"
                     element={
-                        <ProtectedRoute condition={isHostComplete} redirectTo="/personal_det">
+                        <ProtectedRoute condition={isAdmin} redirectTo="/adminAuth">
                             <ProjectCodePage />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/privacy-policy"
-                    element={
-                        <ProtectedRoute condition={isHostComplete} redirectTo="/personal_det">
-                            <PrivacyPolicy />
                         </ProtectedRoute>
                     }
                 />
