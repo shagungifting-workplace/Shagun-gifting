@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { auth } from "../utils/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast';
 
 export default function Admin_Sign_Login() {
     const [formData, setFormData] = useState({ email: '', password: '' });
@@ -45,12 +46,12 @@ export default function Admin_Sign_Login() {
             if (!uid) {
                 throw new Error("User ID not found");
             } else {
-                alert("Login successful!");
+                toast.success("Login successful!");
                 navigate("/admin");
             }
         } catch (error) {
             console.error("Auth error:", error);
-            alert(error.message || "Authentication failed.");
+            toast.error(error.message || "Authentication failed.");
         } finally {
             setLoading(false);
         }

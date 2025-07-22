@@ -3,6 +3,7 @@ import { FaGift, FaArrowLeft, FaCheck } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { db, auth } from '../utils/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import toast from 'react-hot-toast';
 
 export default function Event_det() {
     const navigate = useNavigate();
@@ -46,11 +47,11 @@ export default function Event_det() {
                 updatedAt: serverTimestamp()
             });
 
-            alert("Event details saved!");
+            toast.success("Event details saved!");
             navigate('/budget_bank');
         } catch (error) {
             console.error("Error saving event details:", error);
-            alert("Failed to save event details.");
+            toast.error("Failed to save event details.");
         } finally {
             setLoading(false);
         }

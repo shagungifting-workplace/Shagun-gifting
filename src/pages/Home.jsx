@@ -34,7 +34,6 @@ const ImageSlider = () => {
         return indices;
     };
 
-
     return (
         <div className="relative w-full overflow-hidden">
             <div className="flex justify-center items-center transition-transform duration-700 ease-in-out">

@@ -8,6 +8,7 @@ import { useLoadingStore } from "../store/useLoadingStore";
 import { fetchAllProjects } from "../utils/FetchProject";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import toast from "react-hot-toast";
 
 
 const Host_Dashboard = () => {
@@ -23,7 +24,7 @@ const Host_Dashboard = () => {
             try {
                 const user = auth.currentUser;
                 if (!user) {
-                    alert("User not logged in");
+                    toast.error("User not logged in");
                     return;
                 }
                 const allProjects = await fetchAllProjects();

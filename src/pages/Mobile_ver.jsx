@@ -6,6 +6,7 @@ import { Link,useNavigate } from "react-router-dom";
 import { auth, db } from "../utils/firebase";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { RecaptchaVerifier, linkWithPhoneNumber, } from "firebase/auth";
+import toast from "react-hot-toast";
 
 export default function Mobile_ver() {
 
@@ -22,7 +23,7 @@ export default function Mobile_ver() {
 
     const handleSendOtp = async () => {
         if (phone.length !== 10) {
-            alert("Please enter a valid 10-digit phone number.");
+            toast.error("Please enter a valid 10-digit phone number.");
             return;
         }
 
@@ -31,7 +32,7 @@ export default function Mobile_ver() {
         try {
             const currentUser = auth.currentUser;
             if (!currentUser) {
-                alert("User not signed in.");
+                toast.error("User not signed in.");
                 setLoading(false);
                 return;
             } 
@@ -59,15 +60,15 @@ export default function Mobile_ver() {
             console.log("Result: ", result);
             setConfirmationResult(result);
             window.confirmationResult = result;
-            alert("OTP sent successfully!");
+            toast.success("OTP sent successfully!");
         } catch (error) {
             console.error("Error sending OTP:", error);
-            alert("Failed to send OTP. Try again.");
+            toast.error("Failed to send OTP. Try again.");
 
             if (error.code === "auth/too-many-requests") {
-                alert("Too many attempts. Please wait before trying again.");
+                toast.error("Too many attempts. Please wait before trying again.");
             } else {
-                alert("OTP sending failed. Try again.");
+                toast.error("OTP sending failed. Try again.");
             }
 
             if (window.recaptchaVerifier) {
@@ -100,11 +101,11 @@ export default function Mobile_ver() {
                 verifiedPhoneAt: serverTimestamp(),
             }, { merge: true });
 
-            alert("Phone number verified successfully!");
+            toast.success("Phone number verified successfully!");
             navigate("/personal_det");
         } catch (error) {
             console.error("OTP verification error:", error);
-            alert("Incorrect OTP. Please try again.");
+            toast.error("Incorrect OTP. Please try again.");
         }
     };
 

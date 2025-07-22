@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { db, storage, auth } from "../utils/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import toast from 'react-hot-toast';
 
 export default function Personal_det() {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -21,7 +22,7 @@ export default function Personal_det() {
 
     const handleSubmit = async () => {
         if (!fullName || !eventType) {
-            alert("Please fill in all required fields.");
+            toast.error("Please fill in all required fields.");
             return;
         }
 
@@ -29,7 +30,10 @@ export default function Personal_det() {
 
         try {
             const user = auth.currentUser;
-            if (!user) throw new Error("User not logged in");
+            if (!user) {
+                toast.error("User not logged in");
+                return;
+            }
 
             let fileUrl = null;
 
@@ -53,12 +57,12 @@ export default function Personal_det() {
             }, { merge: true });
 
 
-            alert("Details saved successfully!");
+            toast.success("Details saved successfully!");
             navigate("/event_det");
 
         } catch (err) {
             console.error("Error saving details:", err);
-            alert("Failed to save details. Check console for more info.");
+            toast.error("Failed to save details. Check console for more info.");
         }
 
         setLoading(false);

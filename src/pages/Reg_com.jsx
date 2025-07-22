@@ -3,6 +3,7 @@ import { FaArrowLeft, FaCheck, FaCheckCircle, FaGift } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import { auth, db } from "../utils/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import toast from "react-hot-toast";
 
 export default function Reg_com() {
     const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function Reg_com() {
             try {
                 const user = auth.currentUser;
                 if (!user) {
-                    console.warn("User not logged in");
+                    toast.error("User not logged in");
                     return;
                 }
 
