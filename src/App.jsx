@@ -21,8 +21,43 @@ import GlobalLoader from './components/GlobalLoader';
 import PrivacyPolicy from "./pages/PrivacyPolicy.jsx"
 import AdminChangePassword from "./components/AdminChangePassword.jsx";
 
+
+import { useEffect, useState } from "react";
+import { getDoc, doc } from "firebase/firestore";
+import { auth, db } from "./utils/firebase";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+
 function AppContent() {
     const location = useLocation();
+
+    const [isHostComplete, setIsHostComplete] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const user = auth.currentUser;
+
+            if (!user) return;
+
+            // Check if UID matches Admin
+            const adminUid = import.meta.env.VITE_ADMIN_UID;
+            if (user.uid === adminUid) {
+                setIsAdmin(true);
+                return;
+            }
+
+            // Check host registration completion
+            const docRef = doc(db, `users/${user.uid}/eventDetails/budget`);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists() && docSnap.data()?.isComplete === true) {
+                setIsHostComplete(true);
+            }
+        };
+
+        checkUser();
+    }, []);
+
 
     const hideLayoutRoutes = [
         "/admin",
@@ -48,20 +83,62 @@ function AppContent() {
             
             <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/admin" element={<AdminDashboard />} />
+                <Route
+                    path="/admin"
+                    element={
+                        <ProtectedRoute condition={isAdmin} redirectTo="/">
+                            <AdminDashboard />
+                        </ProtectedRoute>
+                    }
+                />
                 <Route path="/adminAuth" element={<Admin_Sign_Login />} />
-                <Route path="/admin/changepassword" element={<AdminChangePassword />} />
-                <Route path="/mvp_demo" element={<Mvp_demo />} />
+                <Route
+                    path="/admin/changepassword"
+                    element={
+                        <ProtectedRoute condition={isAdmin} redirectTo="/">
+                            <AdminChangePassword />
+                        </ProtectedRoute>
+                    }
+                />
+                {/* <Route path="/mvp_demo" element={<Mvp_demo />} /> */}
                 <Route path="/hostlogin" element={<Sign_login />} />
                 <Route path="/mobile_ver" element={<Mobile_ver />} />
                 <Route path="/personal_det" element={<Personal_det />} />
                 <Route path="/event_det" element={<Event_det />} />
                 <Route path="/budget_bank" element={<Budget_bank />} />
                 <Route path="/reg_com" element={<Reg_com />} />
-                <Route path="/host_dash" element={<Host_Dashboard />} />
-                <Route path="/active-events" element={<ActiveEvents />} />
-                <Route path="/project/:code" element={<ProjectCodePage />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route
+                    path="/host_dash"
+                    element={
+                        <ProtectedRoute condition={isHostComplete} redirectTo="/personal_det">
+                            <Host_Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/active-events"
+                    element={
+                        <ProtectedRoute condition={isHostComplete} redirectTo="/personal_det">
+                            <ActiveEvents />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/project/:code"
+                    element={
+                        <ProtectedRoute condition={isHostComplete} redirectTo="/personal_det">
+                            <ProjectCodePage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/privacy-policy"
+                    element={
+                        <ProtectedRoute condition={isHostComplete} redirectTo="/personal_det">
+                            <PrivacyPolicy />
+                        </ProtectedRoute>
+                    }
+                />
                 <Route
                     path="*"
                     element={
