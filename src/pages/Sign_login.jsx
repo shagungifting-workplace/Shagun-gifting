@@ -62,7 +62,14 @@ export default function Sign_login() {
                 // check is user is complete the payment or not
                 const uid = data.user.uid;
                 if (!uid) {
-                    throw new Error("User ID not found");
+                    toast.error("User ID not found");
+                    return;
+                } 
+                const adminUid = import.meta.env.VITE_ADMIN_UID;
+                if(uid === adminUid) {
+                    toast.error("You are an admin please login from admin panel!");
+                    navigate("/adminAuth");
+                    return;
                 }
                 try {
                     const docRef = doc(db, `users/${uid}/eventDetails/budget`);

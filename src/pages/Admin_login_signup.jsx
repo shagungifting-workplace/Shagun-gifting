@@ -42,9 +42,9 @@ export default function Admin_Sign_Login() {
             const data = await signInWithEmailAndPassword(auth, formData.email, formData.password);
             console.log("data from login:", data);
 
-            const uid = data.user.uid;
+            const uid = data?.user?.uid;
             if (!uid) {
-                throw new Error("User ID not found");
+                toast.error("User ID not found");
             } else {
                 toast.success("Login successful!");
                 navigate("/admin");
