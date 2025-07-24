@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import logo from './../assets/shagunicon.png';
 import { Link } from 'react-router-dom';
 import { auth } from "../utils/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -86,7 +85,7 @@ export default function Admin_Sign_Login() {
                     ← Back to Home
                 </a>
                 </Link>
-                <img src={logo} alt="Shagun Logo" className="h-[50px]" />
+                <img src="/logo.png" alt="Shagun Logo" className="h-[50px]" />
             </div>
 
             {/* Header */}

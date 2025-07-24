@@ -6,7 +6,6 @@ import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../utils/firebase";
 import { db  } from "../utils/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import shagunIcon from "../assets/shagunicon.png";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -76,9 +75,9 @@ const Navbar = () => {
             <div className="max-w-7xl mx-auto flex justify-between items-center">
                 <div>
                     <img
-                        src={shagunIcon}
+                        src="/logo.png"
                         alt="Shagun Icon"
-                        className="h-10 w-auto"
+                        className="md:h-14 h-12 w-auto"
                     />
                 </div>
 

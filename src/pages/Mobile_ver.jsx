@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { FaArrowLeft, FaCheck, FaGift } from "react-icons/fa";
-import giftIcon from "./../assets/react.svg"; // Replace with actual gift icon
-import phoneIcon from "./../assets/react.svg";
 import { Link,useNavigate } from "react-router-dom";
 import { auth, db } from "../utils/firebase";
 import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
@@ -168,14 +166,9 @@ export default function Mobile_ver() {
                 <div className="bg-white rounded-xl p-8 w-full max-w-md shadow-md text-center">
                     <div className="flex flex-col items-center gap-2 mb-4">
                         <img
-                            src={giftIcon}
+                            src="./logo.png"
                             alt="gift"
-                            className="w-[50px] h-[50px] p-2 bg-gradient-to-br from-[#ff9240] to-[#ff5d5d] rounded-xl sm:w-[40px] sm:h-[40px] sm:p-2"
-                        />
-                        <img
-                            src={phoneIcon}
-                            alt="phone"
-                            className="w-[50px] h-[50px] p-2 bg-gradient-to-br from-[#ff9240] to-[#ff5d5d] rounded-xl sm:w-[40px] sm:h-[40px] sm:p-2"
+                            className="h-14 w-24"
                         />
                     </div>
 

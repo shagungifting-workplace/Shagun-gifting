@@ -15,9 +15,9 @@ const Footer = () => {
                 {/* Branding */}
                 <div className="flex flex-col items-center md:items-start">
                     <img
-                        src="/logo.jpg"
+                        src="/logo.png"
                         alt="Shagun Logo"
-                        className="md:h-10  md:w-20 h-20 w-48  mb-4"
+                        className="md:h-12 md:w-24 h-20 w-48  mb-4"
                     />
 
                     <p className="text-gray-400">

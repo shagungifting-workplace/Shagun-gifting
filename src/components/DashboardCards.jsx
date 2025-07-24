@@ -121,9 +121,6 @@ const DashboardCards = () => {
                         <button onClick={() => navigate("changepassword")} className="bg-pink-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-pink-700">
                             Change Password
                         </button>
-                        <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700">
-                            SMS Blast
-                        </button>
                         <button className="bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700">
                             Notifications
                         </button>
