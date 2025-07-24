@@ -4,7 +4,7 @@ import giftIcon from "./../assets/react.svg"; // Replace with actual gift icon
 import phoneIcon from "./../assets/react.svg";
 import { Link,useNavigate } from "react-router-dom";
 import { auth, db } from "../utils/firebase";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { RecaptchaVerifier, linkWithPhoneNumber, } from "firebase/auth";
 import toast from "react-hot-toast";
 
@@ -19,6 +19,26 @@ export default function Mobile_ver() {
 
     useEffect(() => {
         auth.languageCode = 'en'; 
+
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                try {
+                    const docRef = doc(db, `users/${user.uid}/personalDetails/info`);
+                    const docSnap = await getDoc(docRef);
+
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data.email) {
+                            setEmail(data.email);  // ✅ Prefill email field
+                        }
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch user email:", err);
+                }
+            }
+        });
+
+        return () => unsubscribe();
     }, []);
 
     const handleSendOtp = async () => {
@@ -97,7 +117,7 @@ export default function Mobile_ver() {
             // Save user data in Firestore
             await setDoc(doc(db, `users/${uid}/personalDetails/info`), {
                 phone: user.phoneNumber,
-                email: email || user.email || null,
+                email: email || user.email || "",
                 verifiedPhoneAt: serverTimestamp(),
             }, { merge: true });
 
@@ -112,7 +132,7 @@ export default function Mobile_ver() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#fef4f2] via-[#fdf7f4] to-[#fefae9]">
             {/* Navbar */}
-            <div className="flex justify-between items-center px-9 py-7 bg-white border-b border-[#eee] gap-3 flex-nowrap overflow-x-auto">
+            <div className="flex justify-between items-center px-9 py-7 gap-3 flex-nowrap overflow-x-auto">
                 <div className="flex items-center gap-2 shrink-0 min-w-0">
                     <Link to="/">
                         <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
@@ -189,7 +209,7 @@ export default function Mobile_ver() {
                     <button 
                         id="send-otp-btn"
                         onClick={handleSendOtp}
-                        className="w-full p-3 bg-gradient-to-r from-[#ff7a2d] to-[#f53d3d] text-white text-base rounded-lg mb-5"
+                        className="w-full p-3 bg-gradient-to-r from-[#ff7a2d] to-[#f53d3d] hover:from-[#f53d3d] hover:to-[#ff7a2d] text-white text-base rounded-lg mb-5"
                         disabled={loading}
                     >
                         {loading ? "Sending OTP..." : "Send OTP"}
@@ -208,7 +228,7 @@ export default function Mobile_ver() {
                     {/* Verify OTP Button */}
                     <button 
                         onClick={handleVerifyOtp}
-                        className="w-full p-3 bg-[#0e132a] text-white text-base rounded-lg cursor-pointer sm:text-[0.95rem]"
+                        className="w-full p-3 bg-[#0e132a] hover:bg-slate-800 text-white text-base rounded-lg cursor-pointer sm:text-[0.95rem]"
                         disabled={!confirmationResult}
                     >
                         Verify OTP

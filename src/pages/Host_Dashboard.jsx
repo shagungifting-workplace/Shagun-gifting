@@ -1,15 +1,23 @@
-import React, { useEffect, useState, useMemo  } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { FiDownload } from "react-icons/fi";
 import { Link } from "react-router-dom";
-import { auth, db } from "../utils/firebase";
-import { collection, getDocs, setDoc, doc, getDoc, serverTimestamp, } from "firebase/firestore";
+import { auth, db, storage } from "../utils/firebase";
+import {
+    collection,
+    getDocs,
+    setDoc,
+    doc,
+    getDoc,
+    serverTimestamp,
+} from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useLoadingStore } from "../store/useLoadingStore";
 import { fetchAllProjects } from "../utils/FetchProject";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import toast from "react-hot-toast";
-
+import { FaEdit, FaSave, FaTimes } from "react-icons/fa";
 
 const Host_Dashboard = () => {
     const [showAll, setShowAll] = useState(false);
@@ -17,7 +25,90 @@ const Host_Dashboard = () => {
     const [rechargeSuccess, setRechargeSuccess] = useState(false);
     const [projects, setProjects] = useState([]);
     const setLoading = useLoadingStore((state) => state.setLoading);
-    
+
+    // upi details
+    const [upiID, setUpiID] = useState("");
+    const [qrFile, setQrFile] = useState(null);
+    const [qrPreview, setQrPreview] = useState(null);
+    const [existingQrUrl, setExistingQrUrl] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+
+    const uid = auth.currentUser?.uid;
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!uid) return;
+
+            const docRef = doc(db, `users/${uid}/personalDetails/info`);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.upi) {
+                    setUpiID(data.upi.id || "");
+                    setExistingQrUrl(data.upi.qr || null);
+                }
+            }
+        };
+
+        fetchData();
+    }, [uid]);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setQrFile(file);
+            setQrPreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handleSave = async () => {
+        if (!upiID) {
+            toast.error("Please enter your UPI ID.");
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            let qrUrl = existingQrUrl;
+
+            if (qrFile) {
+                const storageRef = ref(storage, `upi_qrs/${uid}_${Date.now()}`);
+                await uploadBytes(storageRef, qrFile);
+                qrUrl = await getDownloadURL(storageRef);
+            }
+
+            await setDoc(
+                doc(db, `users/${uid}/personalDetails/info`),
+                {
+                    upi: {
+                        id: upiID,
+                        qr: qrUrl,
+                    },
+                },
+                { merge: true }
+            );
+
+            toast.success("UPI details updated!");
+            setExistingQrUrl(qrUrl);
+            setQrPreview(null);
+            setQrFile(null);
+            setIsEditing(false);
+        } catch (err) {
+            console.error(err);
+            toast.error("Update failed.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCancel = () => {
+        setIsEditing(false);
+        setQrPreview(null);
+        setQrFile(null);
+    };
+
     useEffect(() => {
         const getProjectByCode = async () => {
             setLoading(true);
@@ -28,7 +119,9 @@ const Host_Dashboard = () => {
                     return;
                 }
                 const allProjects = await fetchAllProjects();
-                const matchedProject = allProjects.find(p => p.uid === user.uid);
+                const matchedProject = allProjects.find(
+                    (p) => p.uid === user.uid
+                );
                 if (matchedProject) {
                     setProjects(matchedProject);
                 } else {
@@ -41,11 +134,9 @@ const Host_Dashboard = () => {
                 setLoading(false);
             }
         };
-        
+
         getProjectByCode();
     }, [setLoading]);
-    
-    console.log(projects)
 
     const handleEnvelopeRecharge = async () => {
         const user = auth.currentUser;
@@ -53,10 +144,10 @@ const Host_Dashboard = () => {
             alert("User not logged in");
             return;
         }
-        
+
         const rechargeAmount = parseInt(envelopeCount);
-        const totalRecharge = rechargeAmount * (5/100); // 5% of tottal amount
-        
+        const totalRecharge = rechargeAmount * (5 / 100); // 5% of tottal amount
+
         const options = {
             key: import.meta.env.VITE_RAZORPAY_KEY_ID,
             amount: totalRecharge * 100, // paise
@@ -68,15 +159,23 @@ const Host_Dashboard = () => {
                     const uid = user.uid;
 
                     // Step 1: Get existing transactions to determine count
-                    const txnsRef = collection(db, `users/${uid}/eventDetails/envelopeRecharges`);
+                    const txnsRef = collection(
+                        db,
+                        `users/${uid}/eventDetails/envelopeRecharges`
+                    );
                     const snapshot = await getDocs(txnsRef);
                     const transactionId = snapshot.size + 1;
 
                     // Step 2: Update member count in budget
-                    const budgetRef = doc(db, `users/${uid}/eventDetails/budget`);
+                    const budgetRef = doc(
+                        db,
+                        `users/${uid}/eventDetails/budget`
+                    );
                     const budgetSnap = await getDoc(budgetRef);
-                    const prevMembers = budgetSnap.exists() ? (budgetSnap.data().members || 0) : 0;
-                    
+                    const prevMembers = budgetSnap.exists()
+                        ? budgetSnap.data().members || 0
+                        : 0;
+
                     await setDoc(
                         budgetRef,
                         {
@@ -88,7 +187,10 @@ const Host_Dashboard = () => {
 
                     // Step 3: Store recharge transaction
                     await setDoc(
-                        doc(db, `users/${uid}/eventDetails/envelopeRecharges/transaction_${transactionId}`),
+                        doc(
+                            db,
+                            `users/${uid}/eventDetails/envelopeRecharges/transaction_${transactionId}`
+                        ),
                         {
                             transactionId,
                             addedEnvelopes: rechargeAmount,
@@ -111,8 +213,8 @@ const Host_Dashboard = () => {
                 contact: auth.currentUser?.phoneNumber || "",
             },
             theme: {
-                color: "#cc0066"
-            }
+                color: "#cc0066",
+            },
         };
 
         const rzp = new window.Razorpay(options);
@@ -120,8 +222,8 @@ const Host_Dashboard = () => {
     };
 
     const generateRandomId = (length = 14) => {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-        let result = '';
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        let result = "";
         for (let i = 0; i < length; i++) {
             result += chars.charAt(Math.floor(Math.random() * chars.length));
         }
@@ -129,7 +231,7 @@ const Host_Dashboard = () => {
     };
 
     const generateRandomMobile = () => {
-        const prefix = ['7', '8', '9'][Math.floor(Math.random() * 3)];
+        const prefix = ["7", "8", "9"][Math.floor(Math.random() * 3)];
         let number = prefix;
         for (let i = 0; i < 9; i++) {
             number += Math.floor(Math.random() * 10);
@@ -145,8 +247,12 @@ const Host_Dashboard = () => {
 
         if (projects?.guests && Array.isArray(projects.guests)) {
             guests = [...projects.guests].sort((a, b) => {
-                const aEnv = parseInt(a.envelope || a.guestId?.replace(/\D/g, "") || "0");
-                const bEnv = parseInt(b.envelope || b.guestId?.replace(/\D/g, "") || "0");
+                const aEnv = parseInt(
+                    a.envelope || a.guestId?.replace(/\D/g, "") || "0"
+                );
+                const bEnv = parseInt(
+                    b.envelope || b.guestId?.replace(/\D/g, "") || "0"
+                );
                 return aEnv - bEnv;
             });
 
@@ -179,11 +285,11 @@ const Host_Dashboard = () => {
             "Sr.": index + 1,
             "Guest UPI ID": txn?.payment_id || `pay_${generateRandomId(14)}`,
             "Guest Mobile": txn?.mobile || generateRandomMobile(),
-            "Amount": txn?.amount || 0,
+            Amount: txn?.amount || 0,
             "Transaction ID": txn?.id || `TXN${index + 1}`,
-            "Date": txn?.date || "--",
-            "Time": txn?.time || "--",
-            "Mode": txn?.mode || "Online"
+            Date: txn?.date || "--",
+            Time: txn?.time || "--",
+            Mode: txn?.mode || "Online",
         }));
 
         const worksheet = XLSX.utils.json_to_sheet(data);
@@ -192,14 +298,17 @@ const Host_Dashboard = () => {
 
         const excelBuffer = XLSX.write(workbook, {
             bookType: "xlsx",
-            type: "array"
+            type: "array",
         });
 
         const blob = new Blob([excelBuffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
 
-        saveAs(blob, `Shagun_Transactions_${projects.projectCode || "project"}.xlsx`);
+        saveAs(
+            blob,
+            `Shagun_Transactions_${projects.projectCode || "project"}.xlsx`
+        );
     };
 
     return (
@@ -211,7 +320,9 @@ const Host_Dashboard = () => {
                         <IoIosArrowBack size={20} /> Host Dashboard
                     </button>
                 </Link>
-                <span className="text-sm font-medium text-gray-600">{projects?.projectCode || "768039-20250714-2018-11"}</span>
+                <span className="text-sm font-medium text-gray-600">
+                    {projects?.projectCode || "768039-20250714-2018-11"}
+                </span>
             </div>
 
             {/* 📝 Card Content */}
@@ -219,20 +330,28 @@ const Host_Dashboard = () => {
                 {/* 🎯 Host Info and Project Code */}
                 <div className="flex flex-col lg:flex-row justify-between gap-6 mb-6">
                     <div className="flex-1">
-                        <h2 className="text-xl font-semibold text-[#1e1e2f]">{projects?.hostName || "Unknown"}</h2>
-                        <p>
-                            Event: {projects?.eventType} | Side: {projects?.side} |{" "}
-                            {projects?.side === "Bride" ? `Heroine: ${projects?.heroNames}` : `Hero: ${projects?.heroNames}`}
+                        <h2 className="text-xl font-semibold text-[#1e1e2f]">
+                            {projects?.hostName || "Unknown"}
+                        </h2>
+                        <p className="capitalize">
+                            Event: {projects?.eventType} | Side:{" "}
+                            {projects?.side} |{" "}
+                            {projects?.side === "Bride"
+                                ? `Heroine: ${projects?.heroNames}`
+                                : `Hero: ${projects?.heroNames}`}
                         </p>
                         <p>Venue: {projects?.venue}</p>
                         <p>
-                            Date: {projects?.eventDate} | Time: {projects?.startTime} | Event No: {projects?.eventNumber}
+                            Date: {projects?.eventDate} | Time:{" "}
+                            {projects?.startTime} | Event No:{" "}
+                            {projects?.eventNumber}
                         </p>
 
                         {/* 📦 Status Boxes */}
                         <div className="flex flex-wrap gap-4 mt-4">
                             <div className="flex-1 text-center bg-[#fff8b0] text-[#665c00] font-bold p-4 rounded-md">
-                                {projects?.guests?.length ?? 0}/{projects?.members || "?"}
+                                {projects?.guests?.length ?? 0}/
+                                {projects?.members || "?"}
                                 <br /> Envelopes
                             </div>
                             <div className="flex-1 text-center bg-[#ffe0e0] text-[#a10000] font-bold p-4 rounded-md">
@@ -240,7 +359,7 @@ const Host_Dashboard = () => {
                                 <br /> Not Reached
                             </div>
                             <div className="flex-1 text-center bg-[#e0ffe5] text-[#087f23] font-bold p-4 rounded-md">
-                                ₹{projects?.amount ?? 0}
+                                ₹{projects?.totalFee ?? 0}
                                 <br /> Revenue
                             </div>
                         </div>
@@ -248,42 +367,117 @@ const Host_Dashboard = () => {
 
                     {/* 🆔 Project code */}
                     <div className="bg-[#ffe6ea] p-4 rounded-lg w-full max-w-sm">
-                        <p className="text-sm text-[#a10000] mb-2">User ID: {auth.currentUser?.uid}</p>
-                        <h4 className="text-lg font-semibold mb-2">📌 Project Code</h4>
+                        <p className="text-sm text-[#a10000] mb-2">
+                            User ID: {auth.currentUser?.uid}
+                        </p>
+                        <h4 className="text-lg font-semibold mb-2">
+                            📌 Project Code
+                        </h4>
                         <div className="bg-[#f1f1f1] p-2 text-center font-bold rounded mb-2">
                             {projects?.projectCode || "768039-20250714-2018-11"}
                         </div>
-                        <p className="text-xs text-[#333]">PIN + Date + Time + Event No.</p>
+                        <p className="text-xs text-[#333]">
+                            PIN + Date + Time + Event No.
+                        </p>
                     </div>
                 </div>
 
                 {/* 🧾 Info Boxes */}
                 <div className="flex flex-wrap gap-4">
-
                     {/* overview */}
                     <div className="flex-1 min-w-[250px] p-4 rounded-lg bg-[#e6f0ff] text-[#003366] shadow-sm">
                         <h4 className="font-semibold mb-1">Overview</h4>
                         <p>Guests: {projects?.members || "--"}</p>
-                        <p>Budget: ₹{projects?.amount?.toLocaleString() || "--"}</p>
+                        <p>
+                            Budget: ₹
+                            {projects?.amount?.toLocaleString() || "--"}
+                        </p>
                     </div>
 
                     {/* financial overview */}
                     <div className="flex-1 min-w-[250px] p-4 rounded-lg bg-[#f3e6ff] text-[#4b0082] shadow-sm">
-                        <h4 className="font-semibold mb-1">Financial Overview</h4>
+                        <h4 className="font-semibold mb-1">
+                            Financial Overview
+                        </h4>
                         <p>UPI Collected: ₹{totalAmount}</p>
                         <p>Utilized Budget: ₹{totalAmount}</p>
-                        <p>Platform Fee: ₹{projects?.platformFee?.toFixed(1) || "0"}</p>
+                        <p>
+                            Platform Fee: ₹
+                            {projects?.platformFee?.toFixed(1) || "0"}
+                        </p>
                         <p>Recharge Payments: ₹0</p>
                     </div>
 
                     {/* upi details */}
                     <div className="flex-1 min-w-[250px] p-4 rounded-lg bg-[#ffddc3] text-[#994d00] shadow-sm">
-                        <h4 className="font-semibold mb-1">UPI Details (Gifts)</h4>
-                        <div className="bg-[#ccc] text-center p-6 rounded-md my-2">QR CODE HERE</div>
-                        <p>UPI ID: {projects?.phone || "N/A"}</p>
-                        <p>
-                            A/C: {projects?.bank?.account || "—"} | IFSC: {projects?.bank?.ifsc || "—"}
-                        </p>
+                        {/* save / edit / cancel */}
+                        <div className="flex justify-between items-center mb-2">
+                            <h4 className="font-semibold">
+                                UPI Details (Gifts)
+                            </h4>
+                            {!isEditing ? (
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="text-sm text-blue-600 hover:underline"
+                                >
+                                    <FaEdit />
+                                </button>
+                            ) : (
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={handleSave}
+                                        className="text-sm text-green-600 font-medium"
+                                    >
+                                        <FaSave />
+                                    </button>
+                                    <button
+                                        onClick={handleCancel}
+                                        className="text-sm text-gray-600 hover:underline"
+                                    >
+                                        <FaTimes />
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* QR code */}
+                        <div className="mb-3">
+                            {isEditing && (
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className="text-sm mb-2"
+                                />
+                            )}
+
+                            {(qrPreview || existingQrUrl) && (
+                                <div className="p-2 rounded-lg text-center">
+                                    <img
+                                        src={qrPreview || existingQrUrl}
+                                        alt="UPI QR"
+                                        className="max-h-[150px] mx-auto object-contain"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* upi id */}
+                        <div className="mb-2 flex flex-col">
+                            <div className="flex">
+                                <label className="block text-sm mb-1">UPI ID:-</label>
+                                <input
+                                    type="text"
+                                    value={upiID}
+                                    disabled={!isEditing}
+                                    onChange={(e) => setUpiID(e.target.value)}
+                                    className={`mx-2 -mt-1.5 ${ isEditing ? "border-gray-400 px-1" : ""}`}
+                                />
+                            </div>
+                            <p className="text-sm">
+                                A/C: {projects?.bank?.account || "—"} | IFSC: {projects?.bank?.ifsc || "—"}
+                            </p>
+                        </div>
                     </div>
 
                     {/* envelope recharge */}
@@ -313,7 +507,9 @@ const Host_Dashboard = () => {
                         </button>
 
                         {rechargeSuccess && (
-                            <p className="text-green-700 text-sm mt-2 font-medium">✅ Recharge Successful</p>
+                            <p className="text-green-700 text-sm mt-2 font-medium">
+                                ✅ Recharge Successful
+                            </p>
                         )}
                     </div>
                 </div>
@@ -322,7 +518,9 @@ const Host_Dashboard = () => {
                 <div className="mt-8">
                     {/* button */}
                     <div className="flex flex-wrap justify-between items-center mb-4">
-                        <h4 className="text-lg font-semibold">Guests Who Paid</h4>
+                        <h4 className="text-lg font-semibold">
+                            Guests Who Paid
+                        </h4>
                         <div className="flex gap-3">
                             {/* show all */}
                             <button
@@ -330,34 +528,53 @@ const Host_Dashboard = () => {
                                 className="bg-gray-300 border border-gray-500 px-3 py-1 rounded text-sm font-medium flex items-center gap-1"
                             >
                                 {showAll ? (
-                                    <> Hide Details <IoIosArrowUp /> </>
+                                    <>
+                                        {" "}
+                                        Hide Details <IoIosArrowUp />{" "}
+                                    </>
                                 ) : (
-                                    <> Show All <IoIosArrowDown /> </>
+                                    <>
+                                        {" "}
+                                        Show All <IoIosArrowDown />{" "}
+                                    </>
                                 )}
                             </button>
-                            
+
                             {/* download button */}
-                            <button onClick={handleDownloadExcel} className="bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1">
+                            <button
+                                onClick={handleDownloadExcel}
+                                className="bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
+                            >
                                 <FiDownload /> Download
                             </button>
                         </div>
                     </div>
-                    
+
                     {/* transactions */}
                     <div className="overflow-x-auto">
-                        <div className={showAll ? 'min-w-[700px]' : ''}>
+                        <div className={showAll ? "min-w-[700px]" : ""}>
                             <table className="w-full bg-white border-collapse">
                                 {/* heading */}
                                 <thead>
                                     <tr className="bg-gray-100">
                                         <th className="p-2 text-left">Sr.</th>
-                                        <th className="p-2 text-left">Guest UPI ID</th>
-                                        <th className="p-2 text-left">Guest Mobile</th>
-                                        <th className="p-2 text-left">Amount</th>
-                                        <th className="p-2 text-left">Txn ID</th>
+                                        <th className="p-2 text-left">
+                                            Guest UPI ID
+                                        </th>
+                                        <th className="p-2 text-left">
+                                            Guest Mobile
+                                        </th>
+                                        <th className="p-2 text-left">
+                                            Amount
+                                        </th>
+                                        <th className="p-2 text-left">
+                                            Txn ID
+                                        </th>
                                         <th className="p-2 text-left">Date</th>
                                         <th className="p-2 text-left">Time</th>
-                                        <th className="p-2 text-left">Payment Mode</th>
+                                        <th className="p-2 text-left">
+                                            Payment Mode
+                                        </th>
                                     </tr>
                                 </thead>
 
@@ -365,32 +582,81 @@ const Host_Dashboard = () => {
                                 <tbody>
                                     {displayedGuests.length > 0 ? (
                                         displayedGuests.map((txn, index) => (
-                                            <tr key={index} className="border-b">
-                                                <td className="p-2">{index + 1}</td>
-                                                <td className="p-2">{txn?.payment_id || `pay_${generateRandomId(14)}`}</td>
-                                                <td className="p-2">{txn?.mobile || generateRandomMobile()}</td>
-                                                <td className="p-2">₹{txn?.amount ?? 0}</td>
-                                                <td className="p-2">{txn?.id ?? `TXN${index + 1}`}</td>
-                                                <td className="p-2">{txn?.timestamp ? txn.timestamp.toDate().toLocaleDateString() : "--"}</td>
-                                                <td className="p-2">{txn?.timestamp ? txn.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--"}</td>
-                                                <td className="p-2">{txn?.mode ?? "Online"}</td>
+                                            <tr
+                                                key={index}
+                                                className="border-b"
+                                            >
+                                                <td className="p-2">
+                                                    {index + 1}
+                                                </td>
+                                                <td className="p-2">
+                                                    {txn?.payment_id ||
+                                                        `pay_${generateRandomId(
+                                                            14
+                                                        )}`}
+                                                </td>
+                                                <td className="p-2">
+                                                    {txn?.mobile ||
+                                                        generateRandomMobile()}
+                                                </td>
+                                                <td className="p-2">
+                                                    ₹{txn?.amount ?? 0}
+                                                </td>
+                                                <td className="p-2">
+                                                    {txn?.id ??
+                                                        `TXN${index + 1}`}
+                                                </td>
+                                                <td className="p-2">
+                                                    {txn?.timestamp
+                                                        ? txn.timestamp
+                                                              .toDate()
+                                                              .toLocaleDateString()
+                                                        : "--"}
+                                                </td>
+                                                <td className="p-2">
+                                                    {txn?.timestamp
+                                                        ? txn.timestamp
+                                                              .toDate()
+                                                              .toLocaleTimeString(
+                                                                  [],
+                                                                  {
+                                                                      hour: "2-digit",
+                                                                      minute: "2-digit",
+                                                                  }
+                                                              )
+                                                        : "--"}
+                                                </td>
+                                                <td className="p-2">
+                                                    {txn?.mode ?? "Online"}
+                                                </td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
-                                            <td className="p-2 text-center text-gray-500" colSpan={8}>
+                                            <td
+                                                className="p-2 text-center text-gray-500"
+                                                colSpan={8}
+                                            >
                                                 No transactions found
                                             </td>
                                         </tr>
                                     )}
 
                                     <tr className="bg-[#f5f5f5] font-bold">
-                                        <td className="p-2" colSpan="3">Total Amount</td>
-                                        <td className="p-2" colSpan="5">₹{totalAmount.toLocaleString()}</td>
+                                        <td className="p-2" colSpan="3">
+                                            Total Amount
+                                        </td>
+                                        <td className="p-2" colSpan="5">
+                                            ₹{totalAmount.toLocaleString()}
+                                        </td>
                                     </tr>
                                     <tr className="bg-[#f5f5f5] font-bold">
-                                        <td className="p-2" colSpan="3">Total Transactions</td>
-                                        <td className="p-2" colSpan="5">{totalTransactions}</td>
+                                        <td className="p-2" colSpan="3">
+                                            Total Transactions
+                                        </td>
+                                        <td className="p-2" colSpan="5">
+                                            {totalTransactions}
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>

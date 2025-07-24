@@ -17,6 +17,9 @@ export default function Event_det() {
     const [eventNumber, setEventNumber] = useState('');
     const [heroNames, setHeroNames] = useState('');
     const [loading, setLoading] = useState(false);
+    const [venueNameWarning, setVenueNameWarning] = useState(false);
+    const [addressWarning, setAddressWarning] = useState(false);
+    const [heroNameWarning, setHeroNameWarning] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -61,7 +64,7 @@ export default function Event_det() {
         <div className="min-h-screen bg-gradient-to-br from-[#fff5ee] to-[#fffaf0]">
 
             {/* ✅ Navbar */}
-            <div className="flex justify-between items-center px-9 py-7 bg-white border-b border-gray-200 gap-3 overflow-x-auto whitespace-nowrap">
+            <div className="flex justify-between items-center px-9 py-7  gap-3 overflow-x-auto whitespace-nowrap">
                 <div className="flex items-center gap-3 flex-shrink-0">
                     <Link to="/">
                         <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
@@ -92,6 +95,7 @@ export default function Event_det() {
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         {/* PIN and Venue Name */}
                         <div className="flex flex-wrap gap-4">
+                            {/* pin */}
                             <div className="flex flex-col flex-1 min-w-[240px]">
                                 <label className="font-medium mb-1">PIN Code (Venue) *</label>
                                 <input
@@ -103,15 +107,26 @@ export default function Event_det() {
                                     className="p-2 border rounded-md"
                                 />
                             </div>
+
+                            {/* venue name */}
                             <div className="flex flex-col flex-1 min-w-[240px]">
                                 <label className="font-medium mb-1">Venue Name *</label>
                                 <input
                                     type="text"
                                     value={venueName}
-                                    onChange={(e) => setVenueName(e.target.value)}
+                                    onChange={(e) => {
+                                        const input = e.target.value;
+                                        setVenueName(input);
+                                        setVenueNameWarning(/[a-z]/.test(input)); // check for lowercase
+                                    }}
                                     required
                                     className="p-2 border rounded-md"
                                 />
+                                {venueNameWarning && (
+                                    <p className="text-xs text-red-500 mt-1 animate-bounce">
+                                        Please use only CAPITAL LETTERS.
+                                    </p>
+                                )}
                             </div>
                         </div>
 
@@ -120,10 +135,19 @@ export default function Event_det() {
                             <label className="font-medium mb-1">Venue Address *</label>
                             <textarea
                                 value={address}
-                                onChange={(e) => setAddress(e.target.value)}
+                                onChange={(e) => {
+                                    const input = e.target.value;
+                                    setAddress(input);
+                                    setAddressWarning(/[a-z]/.test(input)); // check for lowercase
+                                }}
                                 required
                                 className="p-2 border rounded-md min-h-[80px] resize-none"
                             ></textarea>
+                            {addressWarning && (
+                                <p className="text-xs text-red-500 mt-1 animate-bounce">
+                                    Please use only CAPITAL LETTERS.
+                                </p>
+                            )}
                         </div>
 
                         {/* Date and Time */}
@@ -162,6 +186,7 @@ export default function Event_det() {
 
                         {/* Event No. and Hero/Heroine */}
                         <div className="flex flex-wrap gap-4">
+                            {/* event number */}
                             <div className="flex flex-col flex-1 min-w-[240px]">
                                 <label className="font-medium mb-1">Event Number (Sl.No. in the same Venue) *</label>
                                 <input
@@ -176,16 +201,27 @@ export default function Event_det() {
                                     className="p-2 border rounded-md"
                                 />
                             </div>
+
+                            {/* hero */}
                             <div className="flex flex-col flex-1 min-w-[240px]">
                                 <label className="font-medium mb-1">Names of Hero/Heroine *</label>
                                 <input
                                     type="text"
                                     placeholder="Enter names"
                                     value={heroNames}
-                                    onChange={(e) => setHeroNames(e.target.value)}
+                                    onChange={(e) => {
+                                        const input = e.target.value;
+                                        setHeroNames(input);
+                                        setHeroNameWarning(/[a-z]/.test(input)); // check for lowercase
+                                    }}
                                     required
                                     className="p-2 border rounded-md"
                                 />
+                                {heroNameWarning && (
+                                    <p className="text-xs text-red-500 mt-1 animate-bounce">
+                                        Please use only CAPITAL LETTERS.
+                                    </p>
+                                )}
                             </div>
                         </div>
 

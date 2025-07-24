@@ -17,12 +17,17 @@ export default function Budget_bank() {
     });
 
     const razorpay_key = import.meta.env.VITE_RAZORPAY_KEY_ID;
+    const fixedFee = 2000;
+    const navigate = useNavigate();
 
     const [platformFee, setPlatformFee] = useState(0);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [totalFee, setTotalFee] = useState(0);
-    const fixedFee = 2000;
-    const navigate = useNavigate();
+    const [fieldWarnings, setFieldWarnings] = useState({
+        bankName: false,
+        branchName: false,
+        holderName: false,
+    });
 
     useEffect(() => {
         const budget = parseFloat(formData.amount || 0);
@@ -33,6 +38,18 @@ export default function Budget_bank() {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+
+        // Detect if the value contains lowercase letters
+        const hasLowercase = /[a-z]/.test(value);
+
+        // Update warning only for specific fields
+        if (["bankName", "branchName", "holderName"].includes(name)) {
+            setFieldWarnings((prev) => ({
+            ...prev,
+            [name]: hasLowercase,
+            }));
+        }
+
         setFormData((prev) => ({
             ...prev,
             [name]: type === "checkbox" ? checked : value,
@@ -56,7 +73,7 @@ export default function Budget_bank() {
 
             const dataToSave = {
                 ...formData,
-                members: parseInt(formData.members || 0),
+                members: formData.members || 0,
                 amount: parseFloat(formData.amount || 0),
                 platformFee: parseFloat(platformFee.toFixed(1)),
                 fixedFee,
@@ -129,7 +146,7 @@ export default function Budget_bank() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#fff7f5] to-[#fffef5] ">
             {/* Navbar */}
-            <div className="flex justify-between items-center px-9 py-7 bg-white border-b border-gray-200 gap-3 overflow-x-auto whitespace-nowrap rounded-md mb-6 ">
+            <div className="flex justify-between items-center px-9 py-7 gap-3 overflow-x-auto whitespace-nowrap rounded-md mb-6 ">
                 <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
                     <Link to="/">
                         <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
@@ -175,9 +192,10 @@ export default function Budget_bank() {
                             className="border rounded-md p-2"
                         >
                             <option value="">Select Members</option>
-                            <option value="10">10</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
+                            <option value="10">100</option>
+                            <option value="50">200</option>
+                            <option value="100">500</option>
+                            <option value="500 & above">500 & above</option>
                         </select>
                     </div>
                     <div className="flex flex-col flex-1 min-w-[250px]">
@@ -237,8 +255,9 @@ export default function Budget_bank() {
                     🧾 Bank Account Details (Required) *
                 </h4>
                 
-                {/* Bank account number */}
+                {/* Bank account number/ Account Holder Name */}
                 <div className="flex flex-wrap gap-4">
+                    {/* Bank Account Number */}
                     <div className="flex flex-col flex-1 min-w-[250px]">
                         <label className="mb-1 font-medium">
                             Bank Account Number *
@@ -253,6 +272,8 @@ export default function Budget_bank() {
                             placeholder="Enter account number"
                         />
                     </div>
+
+                    {/* Account Holder Name */}
                     <div className="flex flex-col flex-1 min-w-[250px]">
                         <label className="mb-1 font-medium">
                             Account Holder Name *
@@ -266,11 +287,17 @@ export default function Budget_bank() {
                             className="border rounded-md p-2"
                             placeholder="Enter account holder name"
                         />
+                        {fieldWarnings.holderName && (
+                            <p className="text-xs text-red-500 mt-1 animate-bounce">
+                                Please use CAPITAL LETTERS only.
+                            </p>
+                        )}
                     </div>
                 </div>
                 
-                {/* Bank name */}
+                {/* Bank name / Branch Name */}
                 <div className="flex flex-wrap gap-4">
+                    {/* Bank Name */}
                     <div className="flex flex-col flex-1 min-w-[250px]">
                         <label className="mb-1 font-medium">Bank Name *</label>
                         <input
@@ -282,7 +309,14 @@ export default function Budget_bank() {
                             className="border rounded-md p-2"
                             placeholder="Enter bank name"
                         />
+                        {fieldWarnings.bankName && (
+                            <p className="text-xs text-red-500 mt-1 animate-bounce">
+                                Please use CAPITAL LETTERS only.
+                            </p>
+                        )}
                     </div>
+
+                    {/* Branch Name */}
                     <div className="flex flex-col flex-1 min-w-[250px]">
                         <label className="mb-1 font-medium">
                             Branch Name *
@@ -296,6 +330,11 @@ export default function Budget_bank() {
                             className="border rounded-md p-2"
                             placeholder="Enter branch name"
                         />
+                        {fieldWarnings.branchName && (
+                            <p className="text-xs text-red-500 mt-1 animate-bounce">
+                                Please use CAPITAL LETTERS only.
+                            </p>
+                        )}
                     </div>
                 </div>
 

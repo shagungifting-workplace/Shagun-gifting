@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 
 export default function Personal_det() {
     const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState('');
     const [fullName, setFullName] = useState('');
     const [eventType, setEventType] = useState('');
     const [loading, setLoading] = useState(false);
@@ -16,8 +17,23 @@ export default function Personal_det() {
 
     const navigate = useNavigate();
 
-    const handleFileChange = (event) => {
-        setSelectedFile(event.target.files[0]);
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+
+            // For image or pdf preview
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result);
+            };
+
+            if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+                reader.readAsDataURL(file);
+            } else {
+                setPreviewUrl(''); // Unsupported file
+            }
+        }
     };
 
     const handleSubmit = async () => {
@@ -71,7 +87,7 @@ export default function Personal_det() {
     return (
         <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-[#fff5eb] to-[#fffdee]">
             {/* Navbar */}
-            <div className="flex justify-between items-center px-9 py-7 bg-white border-b border-gray-200 gap-3 overflow-x-auto whitespace-nowrap">
+            <div className="flex justify-between items-center px-9 py-7 gap-3 overflow-x-auto whitespace-nowrap">
                 <div className="flex items-center gap-3">
                     <Link to="/">
                         <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
@@ -150,15 +166,39 @@ export default function Personal_det() {
                         className="border-2 border-dashed border-gray-300 rounded-lg px-5 py-6 text-center cursor-pointer text-gray-600 flex flex-col items-center gap-3 mb-6"
                         onClick={() => document.getElementById('fileInput').click()}
                     >
-                        <FaUpload className="text-xl text-gray-500" />
-                        <p className="text-sm">{selectedFile ? selectedFile.name : 'Click to upload event card'}</p>
-                        <input
-                            type="file"
-                            id="fileInput"
-                            accept="image/*,.pdf,.doc,.docx"
-                            className="hidden"
-                            onChange={handleFileChange}
-                        />
+                        {
+                            previewUrl ? (
+                                <div className="mt-4">
+                                    {selectedFile.type.startsWith('image/') ? (
+                                        <img
+                                            src={previewUrl}
+                                            alt="Preview"
+                                            className="max-w-full h-auto rounded-md shadow-md"
+                                        />
+                                    ) : selectedFile.type === 'application/pdf' ? (
+                                        <iframe
+                                            src={previewUrl}
+                                            title="PDF Preview"
+                                            className="w-full h-64 rounded-md shadow-md"
+                                        />
+                                    ) : (
+                                        <p className="text-red-500 text-sm">Preview not available for this file type.</p>
+                                    )}
+                                </div>
+                            ) : (
+                                <>
+                                    <FaUpload className="text-xl text-gray-500" />
+                                    <p className="text-sm">{selectedFile ? selectedFile.name : 'Click to upload event card'}</p>
+                                    <input
+                                        type="file"
+                                        id="fileInput"
+                                        accept="image/*,.pdf,.doc,.docx"
+                                        className="hidden"
+                                        onChange={handleFileChange}
+                                    />
+                                </>
+                            )
+                        }
                     </div>
 
                     {/* save button */}

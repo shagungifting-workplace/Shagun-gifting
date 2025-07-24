@@ -223,7 +223,7 @@ const DashboardCards = () => {
                         Today's Service Fees
                     </h3>
                     <p className="text-2xl font-bold text-indigo-600">
-                        {projects[0]?.totalFee?.toLocaleString()}
+                        ₹{projects[0]?.totalFee?.toLocaleString()}
                     </p>
                     <p className="text-gray-500 mt-1">
                         Total fees collected today

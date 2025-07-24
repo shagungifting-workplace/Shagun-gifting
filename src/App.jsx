@@ -62,6 +62,7 @@ function AppContent() {
         "/reg_com",
         "/active-events",
         "/privacy-policy",
+        "/adminAuth",
         "/admin/changepassword",
     ];
 

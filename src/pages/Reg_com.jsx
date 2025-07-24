@@ -40,7 +40,7 @@ export default function Reg_com() {
                     if (eventData?.pin && eventData?.eventDate && eventData?.startTime && eventData?.eventNumber) {
                         const formattedDate = eventData.eventDate.replace(/-/g, "");
                         const formattedTime = eventData.startTime.replace(/:/g, "");
-                        const generatedCode = `${eventData.pin}-${formattedDate}-${formattedTime}-${eventData.eventNumber}`;
+                        const generatedCode = `${eventData.pin}-${formattedDate}-${formattedTime}-${eventData.eventNumber}00`;
                         setProjectCode(generatedCode);
 
                         // ✅ Save to Firestore
@@ -62,7 +62,7 @@ export default function Reg_com() {
     return (
         <div>
             {/* ✅ Navbar */}
-            <div className="flex justify-between items-center px-9 py-7 bg-white border-b border-gray-200 gap-3 overflow-x-auto whitespace-nowrap">
+            <div className="flex justify-between items-center px-9 py-7 gap-3 overflow-x-auto whitespace-nowrap">
                 <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
                     <Link to="/">
                         <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
