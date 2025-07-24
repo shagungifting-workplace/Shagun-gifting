@@ -11,22 +11,70 @@ import Agents from "./dashboardtabs/Agents";
 import Analytics from "./dashboardtabs/Analytics";
 import { Link, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { auth, db } from "../utils/firebase";
 import { useLoadingStore } from "../store/useLoadingStore";
+import { fetchAllProjects } from "../utils/FetchProject";
 
 const DashboardCards = () => {
     const [activeTab, setActiveTab] = useState("Events");
     const setLoading = useLoadingStore((state) => state.setLoading);
     const navigate = useNavigate();
+    const [projects, setProjects] = useState([]);
+    const [totalRevenue, setTotalRevenue] = useState(0);
+    const [todaysRevenue, setTodaysRevenue] = useState(0);
 
-    const [analytics, setAnalytics] = useState({
-        totalHosts: 0,
-        totalEvents: 0,
-        totalEnvelopes: 0,
-        totalBudget: 0,
-        totalServiceFee: 0,
-    });
+    function parseCustomDate(dateStr) {
+        const [datePart, timePart] = dateStr.split(", ");
+        const [day, month, year] = datePart.split("/").map(Number);
+        const [hours, minutes, seconds] = timePart.split(":").map(Number);
+
+        return new Date(year, month - 1, day, hours, minutes, seconds);
+    }
+
+    useEffect(() => {
+        const getProjectByCode = async () => {
+            setLoading(true);
+            try {
+                const allProjects = await fetchAllProjects();
+                setProjects(allProjects);
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                let totalRevenue = 0;
+                let todaysRevenue = 0;
+
+                allProjects.forEach((project) => {
+                    let createdAt;
+
+                    if (project?.submittedAt?.toDate) {
+                        createdAt = project.submittedAt.toDate();
+                    } else if (typeof project?.submittedAt === "string") {
+                        createdAt = parseCustomDate(project.submittedAt);
+                    }
+
+                    const isToday = createdAt && createdAt >= today;
+
+                    if (project?.totalFee) {
+                        totalRevenue += project?.totalFee;
+                        if (isToday) {
+                            todaysRevenue += project?.totalFee;
+                        }
+                    }
+                });
+
+                setTotalRevenue(totalRevenue);
+                setTodaysRevenue(todaysRevenue);
+            } catch (error) {
+                console.error("Error fetching projects:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        getProjectByCode();
+    }, [setLoading]);
 
     const tabs = [ "Events", "IoT Machines", "Payments", "Hosts", "Agents", "Analytics", ];
 
@@ -43,51 +91,9 @@ const DashboardCards = () => {
             setLoading(true);
             try {
                 const usersSnapshot = await getDocs(collection(db, "users"));
-                const userDocs = usersSnapshot.docs;
+                // const userDocs = usersSnapshot.docs;
                 console.log("userDocs:", usersSnapshot);
 
-                let totalHosts = 0;
-                let totalEvents = 0;
-                let totalEnvelopes = 0;
-                let totalBudget = 0;
-                let totalServiceFee = 0;
-
-                for (const userDoc of userDocs) {
-                    const uid = userDoc.id;
-                    console.log("userDoc ID:", uid);
-
-                    // Check if personalDetails/info exists
-                    const personalSnap = await getDoc(doc(db, `users/${uid}/personalDetails/info`));
-                    if (personalSnap.exists()) {
-                        totalHosts += 1;
-                    }
-
-                    // Check if eventDetails/info exists
-                    const eventSnap = await getDoc(doc(db, `users/${uid}/eventDetails/payment`));
-                    if (eventSnap.exists()) {
-                        totalEvents += 1;
-                    }
-
-                    // Check for envelopes (optional custom doc like envelopeRecharge_...)
-                    const budgetSnap = await getDoc(doc(db, `users/${uid}/eventDetails/budget`));
-                    if (budgetSnap.exists()) {
-                        const budgetData = budgetSnap.data();
-                        if (budgetData.members) {
-                            totalEnvelopes += parseInt(budgetData.members);
-                            totalBudget += parseFloat(budgetData.amount || 0);
-                            totalServiceFee += parseFloat(budgetData.platformFee || 0);
-                        }
-                    }
-                }
-
-                setAnalytics({
-                    totalHosts,
-                    totalEvents,
-                    totalEnvelopes,
-                    totalBudget,
-                    totalServiceFee
-                });
-                
             } catch (error) {
                 console.error("Error Fetching Analytics:", error);
             } finally {
@@ -136,7 +142,7 @@ const DashboardCards = () => {
                             </p>
                             <MdOutlinePeopleOutline className="text-xl text-blue-500" />
                         </div>
-                        <h2 className="text-2xl font-bold text-black">{analytics.totalHosts}</h2>
+                        <h2 className="text-2xl font-bold text-black">{projects?.length}</h2>
                         <p className="text-sm text-gray-500">
                             +180 from last month
                         </p>
@@ -152,7 +158,7 @@ const DashboardCards = () => {
                             </p>
                             <FaCalendarAlt className="text-xl text-green-500" />
                         </div>
-                        <h2 className="text-2xl font-bold text-black">{analytics.totalEvents}</h2>
+                        <h2 className="text-2xl font-bold text-black">{projects?.length}</h2>
                         <p className="text-sm text-gray-500">
                             Live events running
                         </p>
@@ -179,7 +185,7 @@ const DashboardCards = () => {
                         </p>
                         <FaRupeeSign className="text-xl text-purple-500" />
                     </div>
-                    <h2 className="text-2xl font-bold text-black"> ₹{analytics.totalBudget.toLocaleString()}</h2>
+                    <h2 className="text-2xl font-bold text-black"> ₹{todaysRevenue.toLocaleString()}</h2>
                     <p className="text-sm text-gray-500">+12% from yesterday</p>
                 </div>
 
@@ -191,13 +197,14 @@ const DashboardCards = () => {
                         </p>
                         <FiCreditCard className="text-xl text-indigo-500" />
                     </div>
-                    <h2 className="text-2xl font-bold text-black">{analytics.totalEnvelopes}</h2>
+                    <h2 className="text-2xl font-bold text-black">{projects[0]?.members}</h2>
                     <p className="text-sm text-gray-500">Dispensed today</p>
                 </div>
             </div>
 
             {/* Fee Boxes */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* structure */}
                 <div className="bg-white rounded-xl p-6 shadow-md">
                     <h3 className="text-xl font-semibold mb-2">
                         Service Fee Structure
@@ -209,12 +216,14 @@ const DashboardCards = () => {
                         5% of budget amount + fixed service fee
                     </p>
                 </div>
+
+                {/* service fees */}
                 <div className="bg-white rounded-xl p-6 shadow-md">
                     <h3 className="text-xl font-semibold mb-2">
                         Today's Service Fees
                     </h3>
                     <p className="text-2xl font-bold text-indigo-600">
-                        {analytics?.totalServiceFee?.toLocaleString()}
+                        {projects[0]?.totalFee?.toLocaleString()}
                     </p>
                     <p className="text-gray-500 mt-1">
                         Total fees collected today
@@ -243,7 +252,7 @@ const DashboardCards = () => {
             <div className="mt-6">
                 {activeTab === "Events" && <Events />}
                 {activeTab === "IoT Machines" && <IoTMachines />}
-                {activeTab === "Payments" && <Payments />}
+                {activeTab === "Payments" && <Payments totalRevenue={totalRevenue} />}
                 {activeTab === "Hosts" && <Hosts />}
                 {activeTab === "Agents" && <Agents />}
                 {activeTab === "Analytics" && <Analytics />}

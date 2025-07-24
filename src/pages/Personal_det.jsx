@@ -116,6 +116,7 @@ export default function Personal_det() {
                         <option value="reception">Reception</option>
                         <option value="birthday">Birthday</option>
                         <option value="corporate">Corporate</option>
+                        <option value="others">Others</option>
                     </select>
 
                     {(eventType === "marriage" || eventType === "reception") && (

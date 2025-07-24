@@ -67,7 +67,7 @@ const Home = () => {
     return (
         <div className="text-center" id="home">
             {/* Hero Section */}
-            <section className="px-6 py-24 bg-[#fef3eb]">
+            <section className="px-6 py-10 bg-[#fef3eb]">
                 <h1 className="text-4xl md:text-6xl font-bold mb-6 text-[#e54d26]">
                     Modernize Traditional <br /> Indian Gifting
                 </h1>
