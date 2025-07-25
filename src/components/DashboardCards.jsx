@@ -82,6 +82,7 @@ const DashboardCards = () => {
         const fetchAnalytics = onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 console.warn("User not logged in");
+                navigate("/adminAuth");
                 return;
             }
             
@@ -102,7 +103,7 @@ const DashboardCards = () => {
         });
     
         return () => fetchAnalytics(); // Clean up the listener on unmount
-    }, [setLoading]);
+    }, [setLoading, navigate]);
 
     return (
         <div className="p-4 sm:px-6 lg:px-20 bg-[#fef4ec] min-h-screen">

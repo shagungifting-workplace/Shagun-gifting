@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { FiDownload } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { auth, db, storage } from "../utils/firebase";
 import {
     collection,
@@ -25,6 +25,7 @@ const Host_Dashboard = () => {
     const [rechargeSuccess, setRechargeSuccess] = useState(false);
     const [projects, setProjects] = useState([]);
     const setLoading = useLoadingStore((state) => state.setLoading);
+    const navigate = useNavigate();
 
     // upi details
     const [upiID, setUpiID] = useState("");
@@ -116,6 +117,7 @@ const Host_Dashboard = () => {
                 const user = auth.currentUser;
                 if (!user) {
                     toast.error("User not logged in");
+                    navigate("/hostlogin");
                     return;
                 }
                 const allProjects = await fetchAllProjects();
@@ -136,7 +138,7 @@ const Host_Dashboard = () => {
         };
 
         getProjectByCode();
-    }, [setLoading]);
+    }, [setLoading, navigate]);
 
     const handleEnvelopeRecharge = async () => {
         const user = auth.currentUser;
