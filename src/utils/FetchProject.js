@@ -29,7 +29,7 @@ export const fetchAllProjects = async () => {
             const personalData = personalSnap.data();
 
             const guests = guestSnap.docs.map(doc => ({
-                id: doc.id,
+                id: doc?.id,
                 ...doc.data()
             }));
 
@@ -74,8 +74,7 @@ export const fetchAllProjects = async () => {
                 side: personalData.side || "",
                 heroName: personalData.heroName || "",
 
-                guests,
-                
+                guests,                
             };
 
             projects.push(project);

@@ -1,17 +1,10 @@
-// src/components/Footer.jsx
-import React from "react";
-import {
-    FaInstagram,
-    FaXTwitter,
-    FaLinkedin,
-    FaYoutube,
-} from "react-icons/fa6";
+import { FaInstagram, FaLinkedin, FaYoutube, } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
     return (
         <footer className="bg-gray-900 text-white py-10 px-6">
-            <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-5 text-center md:text-left">
                 {/* Branding */}
                 <div className="flex flex-col items-center md:items-start">
                     <img
@@ -55,9 +48,6 @@ const Footer = () => {
                         <li>
                             <a href="#">Real-time Tracking</a>
                         </li>
-                        <li>
-                            <a href="-#">Mobile Management</a>
-                        </li>
                     </ul>
                 </div>
 
@@ -73,16 +63,6 @@ const Footer = () => {
                                 rel="noopener noreferrer"
                             >
                                 Instagram
-                            </a>
-                        </li>
-                        <li className="flex items-center gap-3">
-                            <FaXTwitter className="text-xl" />
-                            <a
-                                href="https://twitter.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                Twitter (X)
                             </a>
                         </li>
                         <li className="flex items-center gap-3">
@@ -103,6 +83,37 @@ const Footer = () => {
                                 rel="noopener noreferrer"
                             >
                                 YouTube
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                {/* Quick Links */}
+                <div>
+                    <h3 className="text-md font-semibold mb-3">Quick Links</h3>
+                    <ul className="space-y-3 text-gray-400 flex flex-col items-center md:items-start">
+                        <li className="flex items-center gap-3">
+                            <a
+                                href="about"
+                                rel="noopener noreferrer"
+                            >
+                                About Us
+                            </a>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <a
+                                href="services"
+                                rel="noopener noreferrer"
+                            >
+                                Our Services
+                            </a>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <a
+                                href="/contact"
+                                rel="noopener noreferrer"
+                            >
+                                Contact Us
                             </a>
                         </li>
                     </ul>

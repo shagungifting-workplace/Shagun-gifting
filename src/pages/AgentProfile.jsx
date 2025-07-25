@@ -1,6 +1,9 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { FaCloudUploadAlt } from "react-icons/fa";
+import { db, auth } from '../utils/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+
 
 const FloatingInput = ({ label, name, type = "text", value, onChange, required = false }) => {
     return (
@@ -27,7 +30,7 @@ const FloatingInput = ({ label, name, type = "text", value, onChange, required =
     );
 };
 
-export default function AgentProfileForm() {
+export default function AgentProfileForm({ setShowDrawer }) {
 
     const [formData, setFormData] = useState({
         agentId: "",
@@ -64,10 +67,33 @@ export default function AgentProfileForm() {
         }
     };
 
+    const handleAddAgent = async (agentData) => {
+        try {
+            const currentUser = auth.currentUser;
+            if (!currentUser) {
+                alert("Admin not logged in");
+                return;
+            }
+
+            const uid = currentUser.uid;
+            const agentDocRef = doc(db, `admin/${uid}/agentDetails/${agentData.agentId}`);
+
+            await setDoc(agentDocRef, {
+                ...agentData,
+                createdAt: new Date(),
+            });
+            toast.success("Agent added successfully!");
+            setShowDrawer(false); 
+        } catch (error) {
+            console.error("Error adding agent:", error);
+            toast.error("Failed to add agent");
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log(formData, file);
-        toast.success("Agent Profile Created Successfully !")
+        handleAddAgent(formData);
     };
 
     return (
