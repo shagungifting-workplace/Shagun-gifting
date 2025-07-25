@@ -20,37 +20,13 @@ import Admin_Sign_Login from "./pages/Admin_login_signup.jsx";
 import GlobalLoader from './components/GlobalLoader';
 import PrivacyPolicy from "./pages/PrivacyPolicy.jsx"
 import AdminChangePassword from "./components/AdminChangePassword.jsx";
+import AboutUs from "./pages/AboutUs.jsx";
+import Services from "./pages/Services.jsx";
+import ContactUs from "./pages/ContactUs.jsx";
+import AgentProfile from "./pages/AgentProfile.jsx";
 
 function AppContent() {
     const location = useLocation();
-
-    // const [isHostComplete, setIsHostComplete] = useState(false);
-    // const [isAdmin, setIsAdmin] = useState(false);
-
-    // useEffect(() => {
-    //     const checkUser = async () => {
-    //         const user = auth.currentUser;
-    //         console.log("user from home",user);
-
-    //         if (!user) return;
-
-    //         // Check if UID matches Admin
-    //         const adminUid = import.meta.env.VITE_ADMIN_UID;
-    //         if (user.uid === adminUid) {
-    //             setIsAdmin(true);
-    //             return;
-    //         }
-
-    //         // Check host registration completion
-    //         const docRef = doc(db, `users/${user.uid}/eventDetails/budget`);
-    //         const docSnap = await getDoc(docRef);
-    //         if (docSnap.exists() && docSnap.data()?.isComplete === true) {
-    //             setIsHostComplete(true);
-    //         }
-    //     };
-
-    //     checkUser();
-    // }, []);
 
     const hideLayoutRoutes = [
         "/admin",
@@ -98,24 +74,13 @@ function AppContent() {
                 <Route path="/budget_bank" element={<Budget_bank />} />
                 <Route path="/reg_com" element={<Reg_com />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route
-                    path="/host_dash"
-                    element={
-                            <Host_Dashboard />
-                    }
-                />
-                <Route
-                    path="/active-events"
-                    element={
-                            <ActiveEvents />
-                    }
-                />
-                <Route
-                    path="/project/:code"
-                    element={
-                            <ProjectCodePage />
-                    }
-                />
+                <Route path="/about" element={<AboutUs />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/contact" element={<ContactUs />} />
+                <Route path="/agent" element={<AgentProfile />} />
+                <Route path="/host_dash" element={<Host_Dashboard />} />
+                <Route path="/active-events" element={<ActiveEvents />} />
+                <Route path="/project/:code" element={<ProjectCodePage />} />
                 <Route
                     path="*"
                     element={
