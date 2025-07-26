@@ -11,7 +11,7 @@ import Agents from "./dashboardtabs/Agents";
 import Analytics from "./dashboardtabs/Analytics";
 import { Link, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../utils/firebase";
 import { useLoadingStore } from "../store/useLoadingStore";
 import { fetchAllProjects } from "../utils/FetchProject";
@@ -23,6 +23,8 @@ const DashboardCards = () => {
     const [projects, setProjects] = useState([]);
     const [totalRevenue, setTotalRevenue] = useState(0);
     const [todaysRevenue, setTodaysRevenue] = useState(0);
+    const [notifications, setNotifications] = useState([]);
+    const [isOpen, setIsOpen] = useState(false);
 
     function parseCustomDate(dateStr) {
         const [datePart, timePart] = dateStr.split(", ");
@@ -76,6 +78,18 @@ const DashboardCards = () => {
         getProjectByCode();
     }, [setLoading]);
 
+    useEffect(() => {
+        const adminUid = import.meta.env.VITE_ADMIN_UID;
+        const unsub = onSnapshot(
+            collection(db, `admin/${adminUid}/notifications`),
+            (snapshot) => {
+                const items = snapshot.docs.map(doc => ({ userId: doc.userId, ...doc.data() }));
+                setNotifications(items);
+            }
+        );
+        return () => unsub();
+    }, []);
+
     const tabs = [ "Events", "IoT Machines", "Payments", "Hosts", "Agents", "Analytics", ];
 
     useEffect(() => {
@@ -110,6 +124,7 @@ const DashboardCards = () => {
             {/* Header Section */}
             <div className="mb-6">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    {/* Title */}
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900">
                             Shagun Admin Dashboard
@@ -118,13 +133,51 @@ const DashboardCards = () => {
                             Manage your IoT vending operations
                         </p>
                     </div>
+
+                    {/* Buttons */}
                     <div className="flex gap-2">
                         <button onClick={() => navigate("changepassword")} className="bg-pink-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-pink-700">
                             Change Password
                         </button>
-                        <button className="bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700">
+                        <button onClick={() => setIsOpen(!isOpen)} className="bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700">
                             Notifications
                         </button>
+
+                        {/* Notification Box */}
+                        {isOpen && (
+                            <div className="absolute right-2 mt-2 w-80 max-h-72 overflow-y-auto bg-white border border-gray-300 rounded-lg shadow-lg z-50 animate-slideUp">
+                                <div className="p-4">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
+                                        <button
+                                            onClick={() => setIsOpen(false)}
+                                            className="text-gray-400 font-bold hover:text-red-500 text-sm"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+
+                                    {notifications.length === 0 ? (
+                                        <p className="text-sm text-gray-500">No new notifications</p>
+                                    ) : (
+                                        <ul className="space-y-3">
+                                            {notifications.slice().reverse().map((notif, index) => (
+                                                <li key={index} className="p-2 bg-[#fef4ec] rounded-md border border-gray-200">
+                                                    <p className="text-sm text-gray-700">
+                                                        {notif.fullName} is Registered with email: {notif.email}
+                                                    </p>
+                                                    <p className="text-xs text-gray-400 mt-1">
+                                                        {notif.createdAt
+                                                            ? new Date(notif.createdAt.seconds * 1000).toLocaleString()
+                                                            : 'Just now'}
+                                                        </p>
+                                                    </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

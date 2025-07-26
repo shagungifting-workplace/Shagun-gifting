@@ -37,14 +37,14 @@ const ImageSlider = () => {
     return (
         <div className="relative w-full overflow-hidden">
             <div className="flex justify-center items-center transition-transform duration-700 ease-in-out">
-                <div className="flex gap-4 md:gap-8 lg:gap-12">
+                <div className="flex gap-4 md:gap-8 lg:gap-16">
                     {getVisibleImages().map((imageIndex, i) => {
                         const isCenter = i === 2;
                         return (
                             <div
                                 key={`${imageIndex}-${i}`}
                                 className={`
-                                    transition-all duration-700 transform w-[120px] sm:w-[180px] md:w-[240px] lg:w-[300px]
+                                    transition-all duration-700 transform w-[120px] sm:w-[180px] md:w-[240px] lg:w-[270px] 
                                     ${ isCenter ? "scale-100 opacity-100 z-10" : "scale-100 opacity-40"} ease-in-out 
                                     ${ i === 0 || i === 4 ? "hidden sm:block opacity-0 scale-90" : ""} rounded-xl overflow-hidden
                                 `}
@@ -67,11 +67,11 @@ const Home = () => {
     return (
         <div className="text-center" id="home">
             {/* Hero Section */}
-            <section className="px-6 py-10 bg-[#fef3eb]">
+            <section className="px-6 py-8 bg-[#fef3eb]">
                 <h1 className="text-4xl md:text-6xl font-bold mb-6 text-[#e54d26]">
                     Modernize Traditional <br /> Indian Gifting
                 </h1>
-                <p className="text-[#4b5563] max-w-2xl mx-auto mb-8 md:text-xl">
+                <p className="text-[#4b5563] max-w-2xl mx-auto mb-6 md:text-xl">
                     Transform envelope gifting at weddings and celebrations with
                     our IoT-enabled vending machines. Secure, traceable, and
                     convenient.
@@ -89,27 +89,8 @@ const Home = () => {
                     </ul>
                 </div>
 
-                {/*/!*Ready for MVP Teasting*!/*/}
-                {/*<div className="max-w-4xl text-center py-6 px-8 mt-10 bg-[#ecfdf5] rounded-xl border border-green-400 mx-auto">*/}
-
-                {/*  /!*<h3 className="flex justify-center items-center gap-2 text-xl text-green-800 font-semibold mb-2">*!/*/}
-                {/*  /!*  <IoMdCheckmarkCircleOutline />*!/*/}
-                {/*  /!*  Ready for MVP Testing*!/*/}
-                {/*  /!*</h3>*!/*/}
-                {/*  /!*<p className="text-green-700 mb-4">*!/*/}
-                {/*  /!*  Test the complete flow without IoT hardware. Validate your concept with real user feedback.*!/*/}
-                {/*  /!*</p>*!/*/}
-
-                {/*  /!*<ul><li><Link to="/mvp_demo">*!/*/}
-                {/*  /!*<button className="text-white bg-green-600 px-4 py-2 font-medium rounded-lg hover:bg-green-700">*!/*/}
-                {/*  /!*  Start Testing →*!/*/}
-                {/*  /!*</button>*!/*/}
-                {/*  /!*</Link></li></ul>*!/*/}
-
-                {/*</div>*/}
-
                 {/* Image Slider Section */}
-                <div className="max-w-6xl mx-auto mt-16">
+                <div className="max-w-6xl mx-auto mt-">
                     {/*<h3 className="text-2xl font-semibold mb-6 text-orange-700">What It Looks Like</h3>*/}
                     <div className="w-full flex justify-center items-center overflow-hidden shadow-[0_10px_20px_rgba(245,101,39,0.3)] cursor-pointer p-9 rounded-xl ">
                         <ImageSlider />
@@ -118,7 +99,7 @@ const Home = () => {
             </section>
 
             {/* Why Choose Shagun Section */}
-            <section className="bg-[#fcf9f9] py-24 px-6">
+            <section className="bg-[#fcf9f9] py-12 px-6">
                 <h3 className="text-4xl font-bold mb-6 text-center text-black">
                     Why Choose Shagun?
                 </h3>

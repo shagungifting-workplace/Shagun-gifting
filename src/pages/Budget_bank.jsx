@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { FaInfoCircle, FaCreditCard, FaArrowLeft, FaGift, FaCheck, } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { db, auth } from "../utils/firebase";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import { notifyAdminOnRegister } from "../utils/notifyAdmin";
+import toast from "react-hot-toast";
 
 export default function Budget_bank() {
     const [formData, setFormData] = useState({
@@ -87,7 +89,19 @@ export default function Budget_bank() {
                 dataToSave
             );
 
-            alert("Budget & Bank details saved successfully!");
+            toast.success("Budget & Bank details saved successfully!");
+
+            const personalRef = doc(db, `users/${user.uid}/personalDetails/info`);
+            const personalSnap = await getDoc(personalRef);
+            const personalData = personalSnap.exists() ? personalSnap.data() : {};
+            const userData = {
+                uid: personalData.uid,
+                fullName: personalData.fullName  || "User",
+                email: personalData.email || user.email || "Unknown",
+            };
+
+            await notifyAdminOnRegister(userData);
+
             navigate("/reg_com");
         } catch (error) {
             console.error("Error saving budget/bank details:", error);
@@ -142,7 +156,7 @@ export default function Budget_bank() {
         const rzp = new window.Razorpay(options);
         rzp.open();
     };
-
+    
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#fff7f5] to-[#fffef5] ">
             {/* Navbar */}
