@@ -6,6 +6,7 @@ import {
     FaFacebookF,
     FaLinkedin,
 } from "react-icons/fa";
+import emailjs from 'emailjs-com';
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -48,15 +49,25 @@ export default function ContactUs() {
         }));
     };
 
+    const service_id = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const template_id = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const public_key = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log("Form Submitted:", formData);
-        toast.success("Your message has been sent successfully!");
-        setFormData({
-            name: "",
-            email: "",
-            phone: "",
-            message: "",
+        emailjs.send(
+            service_id,
+            template_id,
+            formData,
+            public_key
+        )
+        .then(() => {
+            toast.success('Message sent successfully!');
+            setFormData({ name: '', email: '', phone: '', message: '' });
+        })
+        .catch(() => {
+            toast.error('Failed to send message. Try again.');
         });
     };
 
