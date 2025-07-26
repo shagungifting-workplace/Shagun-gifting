@@ -10,6 +10,8 @@ const missionPoints = [
 
 const AboutUs = () => {
     const [visibleIndex, setVisibleIndex] = useState(0);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const toggleReadMore = () => setIsExpanded(!isExpanded);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -31,36 +33,39 @@ const AboutUs = () => {
                         <h2 className="sm:text-3xl text-2xl md:text-start text-center font-bold text-[#f45b0b] mb-4">
                             About Us
                         </h2>
-                        <p className="text-gray-800 text-justify lg:text-base text-sm mb-6 leading-relaxed">
-                            <strong>Shagun</strong> was born from a simple idea:
-                            blend centuries-old Indian gifting traditions with
-                            the convenience of modern digital payments. At
-                            weddings and cultural celebrations, guests cherish
-                            the ritual of offering a gift—but counting cash,
-                            finding envelopes, and manual reconciliation slow
-                            down the joy. Shagun’s IoT-enabled envelope vending
-                            kiosks, backed by real-time UPI payments and live
-                            dashboards, deliver a seamless experience for hosts
-                            and guests alike. Our platform empowers hosts to
-                            prepay a small service fee, then watch guests scan,
-                            pay, and receive beautifully crafted envelopes—while
-                            our system handles all the heavy lifting: secure
-                            transactions, automated dispensing, and instant
-                            reconciliation.
-                        </p>
-                        <p className="text-gray-800 text-justify lg:text-base text-sm leading-relaxed">
-                            Over 2025, we piloted Shagun across Hyderabad’s top
-                            venues, earning rave feedback for reliability,
-                            transparency, and elegance. Today, we continue to
-                            refine our offering—adding premium envelope designs,
-                            24/7 support, and deep analytics—so every
-                            celebration feels both rooted in tradition and
-                            powered by innovation.
-                        </p>
+
+                        <div className={`text-gray-800 text-justify lg:text-base text-sm leading-relaxed transition-all duration-300 ease-in-out ${isExpanded ? '' : 'line-clamp-6 sm:line-clamp-none'} mb-2`}>
+                            <p className="mb-4">
+                            <strong>Shagun</strong> was born from a simple idea: blend centuries-old Indian gifting traditions with
+                                the convenience of modern digital payments. At weddings and cultural celebrations, guests cherish
+                                the ritual of offering a gift—but counting cash, finding envelopes, and manual reconciliation slow
+                                down the joy. Shagun’s IoT-enabled envelope vending kiosks, backed by real-time UPI payments and live
+                                dashboards, deliver a seamless experience for hosts and guests alike. Our platform empowers hosts to
+                                prepay a small service fee, then watch guests scan, pay, and receive beautifully crafted envelopes—while
+                                our system handles all the heavy lifting: secure transactions, automated dispensing, and instant
+                                reconciliation.
+                            </p>
+                            <p>
+                                Over 2025, we piloted Shagun across Hyderabad’s top venues, earning rave feedback for reliability,
+                                transparency, and elegance. Today, we continue to refine our offering—adding premium envelope designs,
+                                24/7 support, and deep analytics—so every celebration feels both rooted in tradition and powered by
+                                innovation.
+                            </p>
+                        </div>
+
+                        {/* Show toggle only on small screens */}
+                        <div className="sm:hidden text-center">
+                            <button
+                                className="text-[#f45b0b] text-sm font-medium underline"
+                                onClick={toggleReadMore}
+                            >
+                                {isExpanded ? "See Less" : "See More"}
+                            </button>
+                        </div>
                     </div>
 
                     {/* Image */}
-                    <div className="flex-1 flex justify-center mt-12 ">
+                    <div className="flex-1 flex justify-center md:mt-12 mt-8 ">
                         <img
                             src={aboutImage}
                             alt="Shagun Reconcile Analytics"
