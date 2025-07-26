@@ -76,7 +76,7 @@ const Home = () => {
                     our IoT-enabled vending machines. Secure, traceable, and
                     convenient.
                 </p>
-                <div className="flex justify-center gap-4 flex-wrap">
+                <div className="flex justify-center gap-4 flex-wrap mb-5">
                     <ul>
                         <li>
                             <Link to="/hostlogin">
