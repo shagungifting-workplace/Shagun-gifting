@@ -73,7 +73,7 @@ const Navbar = () => {
     return (
         <nav className="sticky top-0 z-50 bg-[#fef3eb]/70 backdrop-blur-sm border-b border-orange-200 shadow-sm py-4 px-6">
             <div className="max-w-7xl mx-auto flex justify-between items-center">
-                <div>
+                <div onClick={() => navigate("/")} className="cursor-pointer">
                     <img
                         src="/logo.png"
                         alt="Shagun Icon"

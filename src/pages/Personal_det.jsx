@@ -5,6 +5,7 @@ import { db, storage, auth } from "../utils/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import toast from 'react-hot-toast';
+import { deleteUser } from 'firebase/auth';
 
 export default function Personal_det() {
     const [selectedFile, setSelectedFile] = useState(null);
@@ -84,14 +85,30 @@ export default function Personal_det() {
         setLoading(false);
     };
 
+    const handleDeleteAndGoBack = async () => {
+        const user = auth.currentUser;
+
+        if (user) {
+            try {
+                await deleteUser(user);
+                console.log("User deleted successfully");
+                navigate("/"); // redirect after deletion
+            } catch (error) {
+                console.error("Error deleting user:", error);
+                return toast.error("Failed to delete user. Please try again.");
+            }
+        }
+    };
+
     return (
         <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-[#fff5eb] to-[#fffdee]">
             {/* Navbar */}
             <div className="flex justify-between items-center px-9 py-7 gap-3 overflow-x-auto whitespace-nowrap">
                 <div className="flex items-center gap-3">
-                    <Link to="/">
-                        <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
-                    </Link>
+                    <FaArrowLeft
+                        className="text-[16px] text-[#333] cursor-pointer shrink-0"
+                        onClick={handleDeleteAndGoBack}
+                    />
                     <FaGift className="text-lg text-[#f45b0b] flex-shrink-0" />
                     <span className="text-[#f45b0b] font-semibold text-lg sm:text-base">Shagun</span>
                 </div>
@@ -116,7 +133,10 @@ export default function Personal_det() {
                     <input 
                         type="text" 
                         value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
+                        required
+                        autoFocus
+                        placeholder='Enter your full name'
+                        onChange={(e) => setFullName(e.target.value.toUpperCase())}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg mb-5 text-sm" 
                     />
 
@@ -144,8 +164,8 @@ export default function Personal_det() {
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg mb-5 text-sm bg-white"
                             >
                                 <option value="">Select side</option>
-                                <option value="groom">Groom Side</option>
-                                <option value="bride">Bride Side</option>
+                                <option value="groom">Groom </option>
+                                <option value="bride">Bride </option>
                             </select>
 
                             <label className="font-semibold mb-1 block text-gray-800">
@@ -154,7 +174,8 @@ export default function Personal_det() {
                             <input
                                 type="text"
                                 value={heroName}
-                                onChange={(e) => setHeroName(e.target.value)}
+                                placeholder={`Enter ${side === "bride" ? "Bride" : side === "groom" ? "Groom" : "Hero/Heroine"} Name`}
+                                onChange={(e) => setHeroName(e.target.value.toUpperCase())}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg mb-5 text-sm"
                             />
                         </>

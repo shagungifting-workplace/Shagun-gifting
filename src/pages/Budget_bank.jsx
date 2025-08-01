@@ -5,6 +5,8 @@ import { db, auth } from "../utils/firebase";
 import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { notifyAdminOnRegister } from "../utils/notifyAdmin";
 import toast from "react-hot-toast";
+import { deleteUser } from "firebase/auth";
+import { useLoadingStore } from "../store/useLoadingStore";
 
 export default function Budget_bank() {
     const [formData, setFormData] = useState({
@@ -25,11 +27,7 @@ export default function Budget_bank() {
     const [platformFee, setPlatformFee] = useState(0);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [totalFee, setTotalFee] = useState(0);
-    const [fieldWarnings, setFieldWarnings] = useState({
-        bankName: false,
-        branchName: false,
-        holderName: false,
-    });
+    const setLoading = useLoadingStore((state) => state.setLoading);
 
     useEffect(() => {
         const budget = parseFloat(formData.amount || 0);
@@ -40,17 +38,6 @@ export default function Budget_bank() {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-
-        // Detect if the value contains lowercase letters
-        const hasLowercase = /[a-z]/.test(value);
-
-        // Update warning only for specific fields
-        if (["bankName", "branchName", "holderName"].includes(name)) {
-            setFieldWarnings((prev) => ({
-            ...prev,
-            [name]: hasLowercase,
-            }));
-        }
 
         setFormData((prev) => ({
             ...prev,
@@ -66,6 +53,7 @@ export default function Budget_bank() {
             return;
         }
 
+        setLoading(true);
         try {
             const user = auth.currentUser;
             if (!user) {
@@ -100,12 +88,36 @@ export default function Budget_bank() {
                 email: personalData.email || user.email || "Unknown",
             };
 
+            // Fetch event info
+            const eventRef = doc(db, `users/${user.uid}/eventDetails/info`);
+            const eventSnap = await getDoc(eventRef);
+
+            if (eventSnap.exists()) {
+                const eventData = eventSnap.data();
+
+                // ✅ Generate project code
+                if (eventData?.pin && eventData?.eventDate && eventData?.startTime && eventData?.eventNumber) {
+                    const formattedDate = eventData.eventDate.replace(/-/g, "");
+                    const formattedTime = eventData.startTime.replace(/:/g, "");
+                    const generatedCode = `${eventData.pin}-${formattedDate}-${formattedTime}-${eventData.eventNumber}00`;
+
+                    // ✅ Save to Firestore
+                    await setDoc(eventRef, { projectCode: generatedCode }, { merge: true });
+                    console.log("✅ Project code saved to Firestore.");
+                }
+            } else {
+                console.warn("No event info found.");
+            }
+            
+
             await notifyAdminOnRegister(userData);
 
-            navigate("/reg_com");
+            navigate("/host_dash");
         } catch (error) {
             console.error("Error saving budget/bank details:", error);
             alert("Something went wrong. Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -124,7 +136,7 @@ export default function Budget_bank() {
             description: "Platform & Service Fee",
             handler: async function (response) {
                 console.log("Payment success:", response);
-                alert("Payment Successful!");
+                toast.success("Payment Successful!");
                 setPaymentSuccess(true);
 
                 // store payment details in Firestore
@@ -156,15 +168,33 @@ export default function Budget_bank() {
         const rzp = new window.Razorpay(options);
         rzp.open();
     };
-    
+
+    const handleDeleteAndGoBack = async () => {
+        const user = auth.currentUser;
+        if (!user) {
+            alert("User not logged in");
+            return;
+        }
+
+        try {
+            await deleteUser(user);
+            console.log("User deleted successfully");
+            navigate("/"); // redirect after deletion
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            return toast.error("Failed to delete user. Please try again.");
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#fff7f5] to-[#fffef5] ">
             {/* Navbar */}
             <div className="flex justify-between items-center px-9 py-7 gap-3 overflow-x-auto whitespace-nowrap rounded-md mb-6 ">
                 <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
-                    <Link to="/">
-                        <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
-                    </Link>
+                    <FaArrowLeft
+                        className="text-[16px] text-[#333] cursor-pointer shrink-0"
+                        onClick={handleDeleteAndGoBack}
+                    />
                     <FaGift className="text-[20px] text-orange-600" />
                     <span className="font-semibold text-lg text-orange-600">
                         Shagun
@@ -206,9 +236,9 @@ export default function Budget_bank() {
                             className="border rounded-md p-2"
                         >
                             <option value="">Select Members</option>
-                            <option value="10">100</option>
-                            <option value="50">200</option>
-                            <option value="100">500</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                            <option value="500">500</option>
                             <option value="500 & above">500 & above</option>
                         </select>
                     </div>
@@ -295,17 +325,12 @@ export default function Budget_bank() {
                         <input
                             type="text"
                             name="holderName"
-                            value={formData.holderName}
+                            value={formData.holderName.toUpperCase()}
                             onChange={handleChange}
                             required
                             className="border rounded-md p-2"
                             placeholder="Enter account holder name"
                         />
-                        {fieldWarnings.holderName && (
-                            <p className="text-xs text-red-500 mt-1 animate-bounce">
-                                Please use CAPITAL LETTERS only.
-                            </p>
-                        )}
                     </div>
                 </div>
                 
@@ -317,17 +342,12 @@ export default function Budget_bank() {
                         <input
                             type="text"
                             name="bankName"
-                            value={formData.bankName}
+                            value={formData.bankName.toUpperCase()}
                             onChange={handleChange}
                             required
                             className="border rounded-md p-2"
                             placeholder="Enter bank name"
                         />
-                        {fieldWarnings.bankName && (
-                            <p className="text-xs text-red-500 mt-1 animate-bounce">
-                                Please use CAPITAL LETTERS only.
-                            </p>
-                        )}
                     </div>
 
                     {/* Branch Name */}
@@ -338,17 +358,12 @@ export default function Budget_bank() {
                         <input
                             type="text"
                             name="branchName"
-                            value={formData.branchName}
+                            value={formData.branchName.toUpperCase()}
                             onChange={handleChange}
                             required
                             className="border rounded-md p-2"
                             placeholder="Enter branch name"
                         />
-                        {fieldWarnings.branchName && (
-                            <p className="text-xs text-red-500 mt-1 animate-bounce">
-                                Please use CAPITAL LETTERS only.
-                            </p>
-                        )}
                     </div>
                 </div>
 

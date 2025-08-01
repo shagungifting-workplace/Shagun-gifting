@@ -1,10 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { IoSearch } from "react-icons/io5";
 import { useLoadingStore } from "../store/useLoadingStore";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { fetchAllProjects } from "../utils/FetchProject";
+import toast from "react-hot-toast";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { auth } from "../utils/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 const ActiveEvents = () => {
     const [projects, setProjects] = useState([]);
@@ -54,6 +58,35 @@ const ActiveEvents = () => {
 
     const iot = 'Working';
     const status = 'Running';
+
+    const handleDeleteAndGoBack = async (uid) => {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Admin logged in:", user.uid);
+            } else {
+                console.log("No user logged in");
+            }
+        });
+        
+        setLoading(true);
+        try {
+            const functions = getFunctions();
+            const deleteUserByUid = httpsCallable(functions, "deleteUserByUid");
+
+            const res = await deleteUserByUid({ uid });
+            console.log("Delete user from admin: ",res.data.message);
+            toast.success("User deleted successfully");
+
+            await fetchAllProjects().then((updatedProjects) => {
+                setProjects(updatedProjects);
+            });
+
+        } catch (error) {
+            console.error("Error deleting user document:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="bg-[#fdf6ed] min-h-screen p-6">
@@ -107,21 +140,22 @@ const ActiveEvents = () => {
                     <table className="w-full table-auto text-left">
                         {/* title */}
                         <thead>
-                            <tr className="bg-[#fcf4ea] text-gray-600 uppercase text-sm">
-                                <th className="p-3">Project Code</th>
-                                <th className="p-3">Host</th>
-                                <th className="p-3">Envelopes Distributed</th>
-                                <th className="p-3">Status</th>
-                                <th className="p-3">Refund</th>
-                                <th className="p-3">IoT Machine</th>
+                            <tr className="bg-[#fcf4ea] text-gray-600 uppercase lg:text-sm text-xs">
+                                <th className="lg:p-3 p-2 ">Project Code</th>
+                                <th className="lg:p-3 p-2 ">Host</th>
+                                <th className="lg:p-3 p-2 ">Envelopes Distributed</th>
+                                <th className="lg:p-3 p-2 ">Status</th>
+                                <th className="lg:p-3 p-2 ">Refund</th>
+                                <th className="lg:p-3 p-2 ">IoT Machine</th>
+                                <th className="lg:p-3 p-2 ">Actions</th>
                             </tr>
                         </thead>
                         
                         <tbody>
                             {projects.map((proj, i) => (
-                                <tr key={i} className="border-t text-sm">
+                                <tr key={i} className="border-t lg:text-sm text-xs">
                                     {/* uid */}
-                                    <td className="p-3">
+                                    <td className="lg:p-3 p-2">
                                         <Link
                                             to={`/project/${proj?.projectCode}`}
                                             className="text-[#4a0f23] font-semibold hover:underline"
@@ -131,13 +165,13 @@ const ActiveEvents = () => {
                                     </td>
 
                                     {/* host name */}
-                                    <td className="p-3 font-semibold whitespace-nowrap">
+                                    <td className="lg:p-3 p-2 font-semibold whitespace-nowrap">
                                         {proj?.hostName ?? "Unknown"}
                                     </td>
 
                                     {/* envelope */}
-                                    <td className="p-3 w-56">
-                                        <div className="relative bg-[#f3eadd] h-4 rounded-full">
+                                    <td className="lg:p-3 p-2 w-56">
+                                        <div className="relative bg-[#f3eadd] h-6 rounded-full">
                                             <div
                                                 className="absolute left-0 top-0 h-full rounded-full bg-[#5e2120]"
                                                 style={{
@@ -146,7 +180,7 @@ const ActiveEvents = () => {
                                                     }%`,
                                                 }}
                                             ></div>
-                                            <div className="absolute right-1 top-0 text-xs font-semibold">
+                                            <div className="absolute right-2 top-1 text-xs font-semibold">
                                                 {proj?.guests.length}/{proj?.members}
                                             </div>
                                         </div>
@@ -154,7 +188,7 @@ const ActiveEvents = () => {
                                     
                                     {/* status */}
                                     <td
-                                        className={`p-3 font-medium ${
+                                        className={`lg:p-3 p-2 font-medium ${
                                             status === "Running"
                                                 ? "text-[#5e2120]"
                                                 : "text-yellow-600"
@@ -163,10 +197,10 @@ const ActiveEvents = () => {
                                         {status}
                                     </td>
 
-                                    <td className="p-3 text-gray-700">{proj?.refund ?? 0}</td>
+                                    <td className="lg:p-3 p-2 text-gray-700">{proj?.refund ?? 0}</td>
 
                                     {/* IOT machine */}
-                                    <td className="p-3">
+                                    <td className="lg:p-3 p-2">
                                         {iot === "Working" && (
                                             <span className="text-green-600 font-semibold">
                                                 Working
@@ -182,6 +216,17 @@ const ActiveEvents = () => {
                                                 Agent SMS
                                             </span>
                                         )}
+                                    </td>
+
+                                    {/* delete */}
+                                    <td className="lg:p-3 p-2">
+                                        <p onClick={() => {
+                                            if (window.confirm("Are you sure you want to delete this project?")) {
+                                                handleDeleteAndGoBack(proj?.uid)
+                                            }
+                                        }} className="text-red-500 cursor-pointer hover:underline">
+                                            Delete
+                                        </p>
                                     </td>
                                 </tr>
                             ))}

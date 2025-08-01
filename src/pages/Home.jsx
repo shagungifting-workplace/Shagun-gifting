@@ -1,24 +1,24 @@
-import React from "react";
-import { IoRocketOutline, IoGiftOutline } from "react-icons/io5";
-import { AiOutlineThunderbolt } from "react-icons/ai";
-import { IoMdCheckmarkCircleOutline } from "react-icons/io";
+import React, { useEffect, useState } from "react";
+import { IoGiftOutline } from "react-icons/io5";
 import { IoIosArrowForward } from "react-icons/io";
 import { LuSmartphone, LuQrCode, LuShield } from "react-icons/lu";
 import { Link } from "react-router-dom";
 
 // images
 import sliderImg1 from '../assets/slider_img1.jpg';
-import sliderImg2 from '../assets/slider_img2.jpg';
+// import sliderImg2 from '../assets/slider_img2.jpg';
 import sliderImg3 from '../assets/slider_img3.jpg';
 import sliderImg4 from '../assets/slider_img4.jpg';
+import sliderImg5 from '../assets/about_us.png';
+import sliderImg6 from '../assets/image6.webp';
 
 // ImageSlider component
-const images = [sliderImg1, sliderImg2, sliderImg3, sliderImg4];
+const images = [sliderImg1, sliderImg5, sliderImg3, sliderImg4, sliderImg6];
 
 const ImageSlider = () => {
-    const [currentIndex, setCurrentIndex] = React.useState(1);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const interval = setInterval(() => {
             setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
         }, 2000);

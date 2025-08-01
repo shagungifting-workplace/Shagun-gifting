@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { FaArrowLeft, FaCheck, FaGift } from "react-icons/fa";
-import { Link,useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { auth, db } from "../utils/firebase";
 import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
-import { RecaptchaVerifier, linkWithPhoneNumber, } from "firebase/auth";
+import { RecaptchaVerifier, linkWithPhoneNumber, deleteUser } from "firebase/auth";
 import toast from "react-hot-toast";
 
 export default function Mobile_ver() {
@@ -38,6 +38,21 @@ export default function Mobile_ver() {
 
         return () => unsubscribe();
     }, []);
+
+    const handleDeleteAndGoBack = async () => {
+        const user = auth.currentUser;
+
+        if (user) {
+            try {
+                await deleteUser(user);
+                console.log("User deleted successfully");
+                navigate("/"); // redirect after deletion
+            } catch (error) {
+                console.error("Error deleting user:", error);
+                return toast.error("Failed to delete user. Please try again.");
+            }
+        }
+    };
 
     const handleSendOtp = async () => {
         if (phone.length !== 10) {
@@ -132,11 +147,11 @@ export default function Mobile_ver() {
             {/* Navbar */}
             <div className="flex justify-between items-center px-9 py-7 gap-3 flex-nowrap overflow-x-auto">
                 <div className="flex items-center gap-2 shrink-0 min-w-0">
-                    <Link to="/">
-                        <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
-                    </Link>
+                    <FaArrowLeft
+                        className="text-[16px] text-[#333] cursor-pointer shrink-0"
+                        onClick={handleDeleteAndGoBack}
+                    />
                     <FaGift className="text-[20px] text-[#f45b0b] shrink-0" />
-
                     <span className="font-semibold text-[1.2rem] text-[#f45b0b] whitespace-nowrap sm:text-[1rem] xs:text-[0.9rem]">
                         Shagun
                     </span>
@@ -191,9 +206,10 @@ export default function Mobile_ver() {
                     <input
                         type="email"
                         value={email}
+                        disabled={!!email} // Disable if email is already set
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter email address"
-                        className="w-full p-3 mb-4 border border-[#ddd] rounded-lg text-base sm:text-[0.95rem]"
+                        className="w-full cursor-not-allowed p-3 mb-4 border border-[#ddd] rounded-lg text-base sm:text-[0.95rem]"
                     />
 
                     <div id="recaptcha-container" className="my-3" />

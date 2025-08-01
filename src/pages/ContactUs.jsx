@@ -1,11 +1,4 @@
-import {
-    FaEnvelope,
-    FaPhoneAlt,
-    FaMapMarkerAlt,
-    FaInstagram,
-    FaFacebookF,
-    FaLinkedin,
-} from "react-icons/fa";
+import { FaEnvelope, FaPhoneAlt, FaMapMarkerAlt, FaInstagram, FaFacebookF, FaLinkedin, } from "react-icons/fa";
 import emailjs from 'emailjs-com';
 import { useState } from "react";
 import toast from "react-hot-toast";

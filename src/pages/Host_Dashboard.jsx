@@ -3,14 +3,7 @@ import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { FiDownload } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import { auth, db, storage } from "../utils/firebase";
-import {
-    collection,
-    getDocs,
-    setDoc,
-    doc,
-    getDoc,
-    serverTimestamp,
-} from "firebase/firestore";
+import { collection, getDocs, setDoc, doc, getDoc, serverTimestamp, } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useLoadingStore } from "../store/useLoadingStore";
 import { fetchAllProjects } from "../utils/FetchProject";
@@ -18,6 +11,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import toast from "react-hot-toast";
 import { FaEdit, FaSave, FaTimes } from "react-icons/fa";
+import { onAuthStateChanged } from "firebase/auth";
 
 const Host_Dashboard = () => {
     const [showAll, setShowAll] = useState(false);
@@ -111,15 +105,15 @@ const Host_Dashboard = () => {
     };
 
     useEffect(() => {
-        const getProjectByCode = async () => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                console.error("User not logged in");
+                navigate("/hostlogin");
+                return;
+            }
+            
             setLoading(true);
             try {
-                const user = auth.currentUser;
-                if (!user) {
-                    toast.error("User not logged in");
-                    navigate("/hostlogin");
-                    return;
-                }
                 const allProjects = await fetchAllProjects();
                 const matchedProject = allProjects.find(
                     (p) => p.uid === user.uid
@@ -135,9 +129,9 @@ const Host_Dashboard = () => {
             } finally {
                 setLoading(false);
             }
-        };
+        });
 
-        getProjectByCode();
+        return () => unsubscribe(); // Clean up the listener on unmount
     }, [setLoading, navigate]);
 
     const handleEnvelopeRecharge = async () => {
@@ -441,7 +435,7 @@ const Host_Dashboard = () => {
                                 </div>
                             )}
                         </div>
-                        
+
                         {/* QR code */}
                         <div className="mb-3">
                             {isEditing && (
@@ -463,7 +457,7 @@ const Host_Dashboard = () => {
                                 </div>
                             )}
                         </div>
-                        
+
                         {/* upi id */}
                         <div className="mb-2 flex flex-col">
                             <div className="flex">
@@ -473,7 +467,7 @@ const Host_Dashboard = () => {
                                     value={upiID}
                                     disabled={!isEditing}
                                     onChange={(e) => setUpiID(e.target.value)}
-                                    className={`mx-2 -mt-1.5 ${ isEditing ? "border-gray-400 px-1" : ""}`}
+                                    className={`mx-2 -mt-1.5 ${isEditing ? "border-gray-400 px-1" : ""}`}
                                 />
                             </div>
                             <p className="text-sm">
@@ -499,11 +493,10 @@ const Host_Dashboard = () => {
                         <button
                             onClick={handleEnvelopeRecharge}
                             disabled={!envelopeCount || envelopeCount <= 0}
-                            className={`mt-3 w-3/4 ${
-                                envelopeCount > 0
+                            className={`mt-3 w-3/4 ${envelopeCount > 0
                                     ? "bg-[#cc0066] hover:bg-[#b10059]"
                                     : "bg-gray-300 cursor-not-allowed"
-                            } text-white py-2 rounded-md transition-colors`}
+                                } text-white py-2 rounded-md transition-colors`}
                         >
                             Recharge Budget (5% fee)
                         </button>
@@ -611,21 +604,21 @@ const Host_Dashboard = () => {
                                                 <td className="p-2">
                                                     {txn?.timestamp
                                                         ? txn.timestamp
-                                                              .toDate()
-                                                              .toLocaleDateString()
+                                                            .toDate()
+                                                            .toLocaleDateString()
                                                         : "--"}
                                                 </td>
                                                 <td className="p-2">
                                                     {txn?.timestamp
                                                         ? txn.timestamp
-                                                              .toDate()
-                                                              .toLocaleTimeString(
-                                                                  [],
-                                                                  {
-                                                                      hour: "2-digit",
-                                                                      minute: "2-digit",
-                                                                  }
-                                                              )
+                                                            .toDate()
+                                                            .toLocaleTimeString(
+                                                                [],
+                                                                {
+                                                                    hour: "2-digit",
+                                                                    minute: "2-digit",
+                                                                }
+                                                            )
                                                         : "--"}
                                                 </td>
                                                 <td className="p-2">

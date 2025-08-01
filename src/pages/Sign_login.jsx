@@ -109,19 +109,11 @@ export default function Sign_login() {
                 try {
                     const docRef = doc(db, `users/${uid}/eventDetails/budget`);
                     const docSnap = await getDoc(docRef);
-                    console.log(docSnap);
-
-                    const personalDetailsRef = doc(
-                        db,
-                        `users/${uid}/personalDetails/info`
-                    );
-                    const personalDetailsSnap = await getDoc(
-                        personalDetailsRef
-                    );
-                    console.log(personalDetailsSnap);
+                    console.log("logic doc",docSnap);
 
                     if (docSnap.exists()) {
                         const data = docSnap.data();
+                        console.log("data from docSnap:", data);
                         if (data?.isComplete === true) {
                             toast.success("Login successful!", {
                                 duration: 3000,
@@ -129,29 +121,13 @@ export default function Sign_login() {
                             });
                             navigate("/host_dash");
                             return;
-                        } else {
-                            toast.error(
-                                "Please do complete your registraion !"
-                            );
-                            navigate("/personal_det");
-                            return;
-                        }
-                    }
-
-                    if (personalDetailsSnap.exists()) {
-                        const personalData = personalDetailsSnap.data();
-                        if (!personalData?.phone) {
-                            navigate("/mobile_ver");
-                            return;
-                        } else if (personalData?.phone) {
-                            navigate("/host_dash");
-                            return;
-                        }
-                    } else {
-                        toast.error("Please complete your registraion !");
-                        navigate("/mobile_ver");
+                        } 
+                    } else{
+                        toast.error("Please do complete your registration !");
+                        navigate("/hostlogin");
                         return;
                     }
+                    
                 } catch (error) {
                     console.error("Error fetching isComplete:", error);
                 }

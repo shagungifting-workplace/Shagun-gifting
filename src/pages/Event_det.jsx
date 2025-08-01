@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaGift, FaArrowLeft, FaCheck } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { db, auth } from '../utils/firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { deleteUser } from 'firebase/auth';
 
 export default function Event_det() {
     const navigate = useNavigate();
@@ -17,9 +18,31 @@ export default function Event_det() {
     const [eventNumber, setEventNumber] = useState('');
     const [heroNames, setHeroNames] = useState('');
     const [loading, setLoading] = useState(false);
-    const [venueNameWarning, setVenueNameWarning] = useState(false);
-    const [addressWarning, setAddressWarning] = useState(false);
-    const [heroNameWarning, setHeroNameWarning] = useState(false);
+
+    useEffect(() => {
+        auth.languageCode = 'en'; 
+
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                try {
+                    const docRef = doc(db, `users/${user.uid}/personalDetails/info`);
+                    const docSnap = await getDoc(docRef);
+
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        console.log("Fetched user data from event details:", data);
+                        if (data.heroName || data.fullName) {
+                            setHeroNames(data.heroName || data.fullName);
+                        }
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch user Hero Name:", err);
+                }
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -60,15 +83,31 @@ export default function Event_det() {
         }
     };
 
+    const handleDeleteAndGoBack = async () => {
+        const user = auth.currentUser;
+
+        if (user) {
+            try {
+                await deleteUser(user);
+                console.log("User deleted successfully");
+                navigate("/"); // redirect after deletion
+            } catch (error) {
+                console.error("Error deleting user:", error);
+                return toast.error("Failed to delete user. Please try again.");
+            }
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#fff5ee] to-[#fffaf0]">
 
             {/* ✅ Navbar */}
             <div className="flex justify-between items-center px-9 py-7  gap-3 overflow-x-auto whitespace-nowrap">
                 <div className="flex items-center gap-3 flex-shrink-0">
-                    <Link to="/">
-                        <FaArrowLeft className="text-[16px] text-[#333] cursor-pointer shrink-0" />
-                    </Link>
+                    <FaArrowLeft
+                        className="text-[16px] text-[#333] cursor-pointer shrink-0"
+                        onClick={handleDeleteAndGoBack}
+                    />
                     <FaGift className="text-[20px] text-orange-600" />
                     <span className="font-semibold text-lg text-orange-600">Shagun</span>
                 </div>
@@ -99,7 +138,7 @@ export default function Event_det() {
                             <div className="flex flex-col flex-1 min-w-[240px]">
                                 <label className="font-medium mb-1">PIN Code (Venue) *</label>
                                 <input
-                                    type="text"
+                                    type="number"
                                     placeholder="Enter venue PIN code"
                                     value={pin}
                                     onChange={(e) => setPin(e.target.value)}
@@ -114,19 +153,14 @@ export default function Event_det() {
                                 <input
                                     type="text"
                                     value={venueName}
+                                    placeholder='Enter venue name'
                                     onChange={(e) => {
-                                        const input = e.target.value;
+                                        const input = e.target.value.toUpperCase();
                                         setVenueName(input);
-                                        setVenueNameWarning(/[a-z]/.test(input)); // check for lowercase
                                     }}
                                     required
                                     className="p-2 border rounded-md"
                                 />
-                                {venueNameWarning && (
-                                    <p className="text-xs text-red-500 mt-1 animate-bounce">
-                                        Please use only CAPITAL LETTERS.
-                                    </p>
-                                )}
                             </div>
                         </div>
 
@@ -136,18 +170,14 @@ export default function Event_det() {
                             <textarea
                                 value={address}
                                 onChange={(e) => {
-                                    const input = e.target.value;
+                                    const input = e.target.value.toUpperCase();
                                     setAddress(input);
-                                    setAddressWarning(/[a-z]/.test(input)); // check for lowercase
                                 }}
+                                type="text"
+                                placeholder="Enter address"
                                 required
                                 className="p-2 border rounded-md min-h-[80px] resize-none"
                             ></textarea>
-                            {addressWarning && (
-                                <p className="text-xs text-red-500 mt-1 animate-bounce">
-                                    Please use only CAPITAL LETTERS.
-                                </p>
-                            )}
                         </div>
 
                         {/* Date and Time */}
@@ -204,24 +234,19 @@ export default function Event_det() {
 
                             {/* hero */}
                             <div className="flex flex-col flex-1 min-w-[240px]">
-                                <label className="font-medium mb-1">Names of Hero/Heroine *</label>
+                                <label className="font-medium mb-1">Name of Hero/Heroine *</label>
                                 <input
                                     type="text"
-                                    placeholder="Enter names"
+                                    placeholder="Enter name"
                                     value={heroNames}
                                     onChange={(e) => {
-                                        const input = e.target.value;
+                                        const input = e.target.value.toUpperCase();
                                         setHeroNames(input);
-                                        setHeroNameWarning(/[a-z]/.test(input)); // check for lowercase
                                     }}
+                                    disabled={!!heroNames}
                                     required
                                     className="p-2 border rounded-md"
                                 />
-                                {heroNameWarning && (
-                                    <p className="text-xs text-red-500 mt-1 animate-bounce">
-                                        Please use only CAPITAL LETTERS.
-                                    </p>
-                                )}
                             </div>
                         </div>
 
