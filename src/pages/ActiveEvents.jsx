@@ -32,12 +32,12 @@ const ActiveEvents = () => {
 
     const handleDownload = () => {
         const exportData = projects.map((proj) => ({
-            "Project Code": proj.code,
-            "Host": proj.host,
-            "Envelopes Distributed": `${proj.distributed}/${proj.envelope}`,
-            "Status": proj.status,
-            "Refund": proj.refund,
-            "IoT Machine": proj.iot,
+            "Project Code": proj?.projectCode || "N/A",
+            "Host": proj?.hostName || "Unknown",
+            "Envelopes Distributed": `${proj?.distributed || 0}/${proj?.members || 0}`,
+            "Status": proj?.status || "Running",
+            "Refund": proj?.refund || 0,
+            "IoT Machine": proj?.iot || "Working",
         }));
 
         const worksheet = XLSX.utils.json_to_sheet(exportData);
