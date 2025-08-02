@@ -8,6 +8,7 @@ import { db  } from "../utils/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { CgProfile } from "react-icons/cg";
 
 const Navbar = () => {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -70,6 +71,8 @@ const Navbar = () => {
         }
     };
 
+    const adminUID = import.meta.env.VITE_ADMIN_UID;
+
     return (
         <nav className="sticky top-0 z-50 bg-[#fef3eb]/70 backdrop-blur-sm border-b border-orange-200 shadow-sm py-4 px-6">
             <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -103,14 +106,24 @@ const Navbar = () => {
                             </li>
                         </>
                     ) : (
-                        <li>
+                        <>
                             <button
                                 onClick={handleLogout}
                                 className="py-2 px-4 border border-gray-300 rounded-xl text-red-600 font-semibold"
                             >
                                 Logout
                             </button>
-                        </li>
+                            {
+                                auth.currentUser.uid !== adminUID && (
+                                    <Link to="/profile">
+                                        <button className="px-4 py-2 border border-gray-300 rounded-xl flex items-center gap-2">
+                                            <CgProfile size={20} />
+                                            Profile
+                                        </button>
+                                    </Link>
+                                )
+                            }
+                        </>
                     )}
 
                     {isLoggedIn && 
@@ -154,12 +167,24 @@ const Navbar = () => {
                             </Link>
                         </div>
                     ) : (
-                        <button
-                            onClick={handleLogout}
-                            className="w-full py-2 px-4 border border-gray-300 rounded-md text-red-600 font-semibold"
-                        >
-                            Logout
-                        </button>
+                        <div className="flex flex-col gap-4">
+                            <button
+                                onClick={handleLogout}
+                                className="w-full py-2 px-4 border border-gray-300 rounded-md text-red-600 font-semibold"
+                            >
+                                Logout
+                            </button>
+                            {
+                                auth.currentUser.uid !== adminUID && (
+                                    <Link to="/profile">
+                                        <button className="w-full px-4 py-2 border border-gray-300 rounded-md flex items-center gap-2 justify-center">
+                                            <CgProfile size={20} />
+                                            Profile
+                                        </button>
+                                    </Link>
+                                )
+                            }
+                        </div>
                     )}
 
                     {isLoggedIn && 
