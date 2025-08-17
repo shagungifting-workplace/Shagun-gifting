@@ -55,13 +55,13 @@ export default function ContactUs() {
             formData,
             public_key
         )
-        .then(() => {
-            toast.success('Message sent successfully!');
-            setFormData({ name: '', email: '', phone: '', message: '' });
-        })
-        .catch(() => {
-            toast.error('Failed to send message. Try again.');
-        });
+            .then(() => {
+                toast.success('Message sent successfully!');
+                setFormData({ name: '', email: '', phone: '', message: '' });
+            })
+            .catch(() => {
+                toast.error('Failed to send message. Try again.');
+            });
     };
 
     return (
@@ -130,32 +130,66 @@ export default function ContactUs() {
             <div className="mt-16 text-center max-w-2xl mx-auto">
                 <h3 className="text-3xl font-bold mb-6">Or Reach Us Directly</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm sm:text-base">
-                    <div className="flex items-center gap-2 justify-center sm:justify-start">
+
+                    <a
+                        href="mailto:info@myshagun.co.in"
+                        className="flex items-center gap-2 justify-center sm:justify-start hover:text-[#f45b0b] transition"
+                    >
                         <FaEnvelope className="text-gray-600" />
                         info@myshagun.co.in
-                    </div>
-                    <div className="flex items-center gap-2 justify-center sm:justify-start">
+                    </a>
+
+                    <a
+                        href="https://instagram.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 justify-center sm:justify-start hover:text-[#f45b0b] transition"
+                    >
                         <FaInstagram className="text-gray-600" />
                         @myshagun
-                    </div>
-                    <div className="flex items-center gap-2 justify-center sm:justify-start">
+                    </a>
+
+                    <a
+                        href="tel:+919701513880"
+                        className="flex items-center gap-2 justify-center sm:justify-start hover:text-[#f45b0b] transition"
+                    >
                         <FaPhoneAlt className="text-gray-600" />
                         +91 97015 13880
-                    </div>
-                    <div className="flex items-center gap-2 justify-center sm:justify-start">
+                    </a>
+
+                    <a
+                        href="https://facebook.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 justify-center sm:justify-start hover:text-[#f45b0b] transition"
+                    >
                         <FaFacebookF className="text-gray-600" />
                         /myshagun
-                    </div>
-                    <div className="flex items-center gap-2 justify-center sm:justify-start">
+                    </a>
+
+                    <a
+                        href="https://www.google.com/maps/search/Hyderabad,+Telangana"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 justify-center sm:justify-start hover:text-[#f45b0b] transition"
+                    >
                         <FaMapMarkerAlt className="text-gray-600" />
                         Hyderabad, Telangana
-                    </div>
-                    <div className="flex items-center gap-2 justify-center sm:justify-start">
+                    </a>
+
+                    <a
+                        href="https://linkedin.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 justify-center sm:justify-start hover:text-[#f45b0b] transition"
+                    >
                         <FaLinkedin className="text-gray-600" />
                         /company/myshagun
-                    </div>
+                    </a>
+
                 </div>
             </div>
+
         </section>
     );
 }
