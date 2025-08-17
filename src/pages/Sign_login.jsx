@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { auth, db } from "../utils/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, } from "firebase/auth";
 import { setDoc, doc, serverTimestamp, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -172,6 +172,16 @@ export default function Sign_login() {
         }
     };
 
+    const handleForgotPassword = async (email) => {
+        try {
+            await sendPasswordResetEmail(auth, email);
+            toast.success("Password reset email sent! Check your Inbox/Spam.");
+        } catch (error) {
+            console.error("Error sending reset email:", error.message);
+            toast.error(error.message);
+        }
+    };
+
     return (
         <div
             className="min-h-screen bg-[#fef4ed]  flex flex-col items-center"
@@ -187,7 +197,7 @@ export default function Sign_login() {
                         ← Back to Home
                     </a>
                 </Link>
-                <img src="/logo.png" alt="Shagun Logo" className="h-[50px]" />
+                <img src="/logo.png" onClick={() => navigate("/")} alt="Shagun Logo" className="h-[50px] cursor-pointer" />
             </div>
 
             {/* Header */}
@@ -352,6 +362,18 @@ export default function Sign_login() {
                             </span>
                         )}
                     </div>
+
+                    {/* forgot password */}
+                    {isLogin && (
+                        <div className="text-right">
+                            <span
+                                onClick={() => handleForgotPassword(formData.email)}
+                                className="lg:text-sm text-xs cursor-pointer hover:text-[#f36b1c] text-gray-600"
+                            >
+                                forgot password
+                            </span>
+                        </div>
+                    )}
 
                     {/* button */}
                     <button

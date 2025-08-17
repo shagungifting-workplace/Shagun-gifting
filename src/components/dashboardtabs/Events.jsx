@@ -103,7 +103,7 @@ const Events = () => {
                                     Amount Collected
                                 </p>
                                 <p className="text-black font-semibold">
-                                    {project?.totalFee}
+                                    ₹{(project?.platformFee + project?.fixedFee) || 0}
                                 </p>
                             </div>
                             <div>

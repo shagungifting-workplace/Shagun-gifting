@@ -4,7 +4,7 @@ import { FaRegChartBar } from "react-icons/fa";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../utils/firebase";
-import { db  } from "../utils/firebase";
+import { db } from "../utils/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -14,6 +14,32 @@ const Navbar = () => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
+
+    const [isLocked, setIsLocked] = useState(false);
+
+    useEffect(() => {
+        const checkEventLock = async () => {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const docRef = doc(db, `users/${user.uid}/eventDetails/info`);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const eventData = docSnap.data();
+                const eventDate = eventData?.eventDate ? new Date(eventData.eventDate) : null;
+
+                if (eventDate) {
+                    const today = new Date();
+                    if (today >= eventDate) {
+                        setIsLocked(true);
+                    }
+                }
+            }
+        };
+
+        checkEventLock();
+    }, [isLoggedIn]);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -49,7 +75,7 @@ const Navbar = () => {
             console.log("Navigating to admin dashboard");
             navigate("/admin");
             return;
-        } 
+        }
 
         // Host case
         const docRef = doc(db, `users/${uid}/eventDetails/budget`);
@@ -115,18 +141,25 @@ const Navbar = () => {
                             </button>
                             {
                                 auth.currentUser.uid !== adminUID && (
-                                    <Link to="/profile">
-                                        <button className="px-4 py-2 border border-gray-300 rounded-xl flex items-center gap-2">
-                                            <CgProfile size={20} />
-                                            Profile
-                                        </button>
-                                    </Link>
+                                    <button
+                                        onClick={() => {
+                                            if (isLocked) {
+                                                toast.error("You can't change your profile now. Because your event date is reached.");
+                                            } else {
+                                                window.location.href = "/profile"; // allow navigation
+                                            }
+                                        }}
+                                        className="px-4 py-2 border border-gray-300 rounded-xl flex items-center gap-2"
+                                    >
+                                        <CgProfile size={20} />
+                                        Profile
+                                    </button>
                                 )
                             }
                         </>
                     )}
 
-                    {isLoggedIn && 
+                    {isLoggedIn &&
                         <li>
                             <button
                                 onClick={handleDashboard}
@@ -176,18 +209,26 @@ const Navbar = () => {
                             </button>
                             {
                                 auth.currentUser.uid !== adminUID && (
-                                    <Link to="/profile">
-                                        <button className="w-full px-4 py-2 border border-gray-300 rounded-md flex items-center gap-2 justify-center">
-                                            <CgProfile size={20} />
-                                            Profile
-                                        </button>
-                                    </Link>
+                                    <button
+                                        onClick={(e) => {
+                                            if (isLocked) {
+                                                e.preventDefault(); // stop navigation
+                                                toast.error("You can't change your profile now. Because your event date is reached.");
+                                            } else {
+                                                window.location.href = "/profile"; // navigate manually
+                                            }
+                                        }}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-md flex items-center gap-2 justify-center"
+                                    >
+                                        <CgProfile size={20} />
+                                        Profile
+                                    </button>
                                 )
                             }
                         </div>
                     )}
 
-                    {isLoggedIn && 
+                    {isLoggedIn &&
                         <button
                             onClick={handleDashboard}
                             className="w-full px-4 py-2 border border-gray-300 rounded-md flex items-center gap-2 justify-center"

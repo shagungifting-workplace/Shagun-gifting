@@ -11,7 +11,7 @@ import Agents from "./dashboardtabs/Agents";
 import Analytics from "./dashboardtabs/Analytics";
 import { Link, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { auth, db } from "../utils/firebase";
 import { useLoadingStore } from "../store/useLoadingStore";
 import { fetchAllProjects } from "../utils/FetchProject";
@@ -25,6 +25,11 @@ const DashboardCards = () => {
     const [todaysRevenue, setTodaysRevenue] = useState(0);
     const [notifications, setNotifications] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [fixedTotalFees, setFixedTotalFees] = useState(0);
+    const [serviceTotalFees, setServiceTotalFees] = useState(0);
+    const [todaysFixedFees, setTodaysFixedFees] = useState(0);
+    const [todaysServiceFees, setTodaysServiceFees] = useState(0);
+    const [activeEvents, setActiveEvents] = useState(0);
 
     function parseCustomDate(dateStr) {
         const [datePart, timePart] = dateStr.split(", ");
@@ -47,8 +52,18 @@ const DashboardCards = () => {
                 let totalRevenue = 0;
                 let todaysRevenue = 0;
 
+                let totalFixedFees = 0;
+                let totalServiceFees = 0;
+                let todaysFixedFees = 0;
+                let todaysServiceFees = 0;
+
+                let activeEventsCount = 0;
+
                 allProjects.forEach((project) => {
                     let createdAt;
+                    if(project?.status === "Running") {
+                        activeEventsCount++;
+                    }
 
                     if (project?.submittedAt?.toDate) {
                         createdAt = project.submittedAt.toDate();
@@ -59,15 +74,59 @@ const DashboardCards = () => {
                     const isToday = createdAt && createdAt >= today;
 
                     if (project?.totalFee) {
-                        totalRevenue += project?.totalFee;
+                        totalRevenue += project?.fixedFee + project?.platformFee;
                         if (isToday) {
                             todaysRevenue += project?.totalFee;
                         }
                     }
+
+                    // ✅ Add fixed & service fees
+                    if (project?.fixedFee) {
+                        totalFixedFees += project.fixedFee;
+                        if (isToday) {
+                            todaysFixedFees += project.fixedFee;
+                        }
+                    }
+
+                    if (project?.platformFee) {
+                        totalServiceFees += project.platformFee;
+                        if (isToday) {
+                            todaysServiceFees += project.platformFee;
+                        }
+                    }
+
+                    // ✅ Include today's envelope recharges (service fee part)
+                    if (project?.recharges?.length) {
+                        project.recharges.forEach((r) => {
+                            // handle both Firestore Timestamp and string
+                            let paidDate;
+                            if (r?.paidAt?.toDate) {
+                                paidDate = r.paidAt.toDate();
+                            } else if (typeof r?.paidAt === "string") {
+                                paidDate = parseCustomDate(r.paidAt);
+                            }
+
+                            if (paidDate && paidDate >= today) {
+                                // ✅ calculate platform fee from recharge
+                                const rechargePlatformFee = (r?.RechargePaid || 0);
+                                todaysServiceFees += rechargePlatformFee;
+                            }
+                        });
+                    }
                 });
 
+                // Update state
                 setTotalRevenue(totalRevenue);
                 setTodaysRevenue(todaysRevenue);
+
+                setFixedTotalFees(totalFixedFees);
+                setServiceTotalFees(totalServiceFees);
+
+                setTodaysFixedFees(todaysFixedFees);
+                setTodaysServiceFees(todaysServiceFees);
+
+                setActiveEvents(activeEventsCount);
+
             } catch (error) {
                 console.error("Error fetching projects:", error);
             } finally {
@@ -90,7 +149,7 @@ const DashboardCards = () => {
         return () => unsub();
     }, []);
 
-    const tabs = [ "Events", "IoT Machines", "Payments", "Hosts", "Agents", "Analytics", ];
+    const tabs = ["Events", "IoT Machines", "Payments", "Hosts", "Agents", "Analytics",];
 
     useEffect(() => {
         const fetchAnalytics = onAuthStateChanged(auth, async (user) => {
@@ -99,25 +158,33 @@ const DashboardCards = () => {
                 navigate("/adminAuth");
                 return;
             }
-            
-            const uid = user.uid;
-            console.log("uid from admin:", uid);
-            
-            setLoading(true);
-            try {
-                const usersSnapshot = await getDocs(collection(db, "users"));
-                // const userDocs = usersSnapshot.docs;
-                console.log("userDocs:", usersSnapshot);
-
-            } catch (error) {
-                console.error("Error Fetching Analytics:", error);
-            } finally {
-                setLoading(false);
-            }
         });
-    
+
         return () => fetchAnalytics(); // Clean up the listener on unmount
     }, [setLoading, navigate]);
+
+    const handleExport = async () => {
+        try {
+            const response = await fetch("https://us-central1-gifting-99729.cloudfunctions.net/exportFirestoreToExcel");
+            if (!response.ok) throw new Error("Network error");
+
+            // Convert response → Blob (Excel file)
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            // Create download link
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "firestore_export.xlsx";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+        } catch (error) {
+            console.error("Export failed:", error);
+            alert("Export failed, check console");
+        }
+    };
 
     return (
         <div className="p-4 sm:px-6 lg:px-20 bg-[#fef4ec] min-h-screen">
@@ -136,6 +203,9 @@ const DashboardCards = () => {
 
                     {/* Buttons */}
                     <div className="flex gap-2">
+                        <button onClick={handleExport} className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-500">
+                            Download user details
+                        </button>
                         <button onClick={() => navigate("changepassword")} className="bg-pink-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-pink-700">
                             Change Password
                         </button>
@@ -170,8 +240,8 @@ const DashboardCards = () => {
                                                         {notif.createdAt
                                                             ? new Date(notif.createdAt.seconds * 1000).toLocaleString()
                                                             : 'Just now'}
-                                                        </p>
-                                                    </li>
+                                                    </p>
+                                                </li>
                                             ))}
                                         </ul>
                                     )}
@@ -185,7 +255,7 @@ const DashboardCards = () => {
             {/* Dashboard Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-10">
                 {/* Total Hosts */}
-                <Link to="/active-events">
+                <div onClick={() => navigate("/total-hosts")} className="cursor-pointer">
                     <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-blue-500 hover:shadow-md transition">
                         <div className="flex justify-between items-center">
                             <p className="text-sm text-gray-600 font-semibold">
@@ -198,10 +268,10 @@ const DashboardCards = () => {
                             +180 from last month
                         </p>
                     </div>
-                </Link>
+                </div>
 
                 {/* Active Events */}
-                <Link to="/active-events">
+                <div onClick={() => navigate("/active-events")}>
                     <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-green-500 cursor-pointer hover:shadow-md transition">
                         <div className="flex justify-between items-center">
                             <p className="text-sm text-gray-600 font-semibold">
@@ -209,12 +279,12 @@ const DashboardCards = () => {
                             </p>
                             <FaCalendarAlt className="text-xl text-green-500" />
                         </div>
-                        <h2 className="text-2xl font-bold text-black">{projects?.length}</h2>
+                        <h2 className="text-2xl font-bold text-black">{activeEvents}</h2>
                         <p className="text-sm text-gray-500">
                             Live events running
                         </p>
                     </div>
-                </Link>
+                </div>
 
                 {/* Machines Online */}
                 <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-orange-500">
@@ -254,31 +324,41 @@ const DashboardCards = () => {
             </div>
 
             {/* Fee Boxes */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* structure */}
-                <div className="bg-white rounded-xl p-6 shadow-md">
-                    <h3 className="text-xl font-semibold mb-2">
-                        Service Fee Structure
-                    </h3>
-                    <p className="text-2xl font-bold text-green-600">
-                        5% + ₹2,000
-                    </p>
-                    <p className="text-gray-500 mt-1">
-                        5% of budget amount + fixed service fee
-                    </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-10">
+                {/* Service Fee Structure */}
+                <div className="bg-white rounded-lg lg:p-6 p-4 space-y-2 shadow-sm hover:shadow-md transition">
+                    <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-600 font-semibold">Service Fee Structure</p>
+                    </div>
+                    <h2 className="text-2xl font-bold text-blue-500">5% + ₹2,000</h2>
+                    <p className="text-sm text-gray-500">5% of budget amount + fixed fee</p>
                 </div>
 
-                {/* service fees */}
-                <div className="bg-white rounded-xl p-6 shadow-md">
-                    <h3 className="text-xl font-semibold mb-2">
-                        Today's Service Fees
-                    </h3>
-                    <p className="text-2xl font-bold text-indigo-600">
-                        ₹{projects[0]?.totalFee?.toLocaleString()}
-                    </p>
-                    <p className="text-gray-500 mt-1">
-                        Total fees collected today
-                    </p>
+                {/* Today's Service Fees */}
+                <div className="bg-white rounded-lg lg:p-6 p-4 space-y-2 shadow-sm hover:shadow-md transition">
+                    <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-600 font-semibold">Today's Service Fees</p>
+                    </div>
+                    <h2 className="text-2xl font-bold text-green-500">₹{todaysServiceFees.toLocaleString()}</h2>
+                    <p className="text-sm text-gray-500">Total fees collected today</p>
+                </div>
+
+                {/* Total Fixed Fees */}
+                <div className="bg-white rounded-lg lg:p-6 p-4 space-y-2 shadow-sm hover:shadow-md transition">
+                    <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-600 font-semibold">Total Fixed Fees</p>
+                    </div>
+                    <h2 className="text-2xl font-bold text-orange-500">₹{fixedTotalFees.toLocaleString()}</h2>
+                    <p className="text-sm text-gray-500">Total fixed fees collected</p>
+                </div>
+
+                {/* Total Revenue */}
+                <div className="bg-white rounded-lg lg:p-6 p-4 space-y-2 shadow-sm hover:shadow-md transition">
+                    <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-600 font-semibold">Total Revenue</p>
+                    </div>
+                    <h2 className="text-2xl font-bold text-purple-500">₹{totalRevenue.toLocaleString()}</h2>
+                    <p className="text-sm text-gray-500">Upto today all types of income</p>
                 </div>
             </div>
 
@@ -288,11 +368,10 @@ const DashboardCards = () => {
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`w-full px-4 py-2 rounded-lg whitespace-nowrap transition ${
-                            activeTab === tab
-                                ? "bg-white text-black shadow"
-                                : "hover:bg-gray-100"
-                        }`}
+                        className={`w-full px-4 py-2 rounded-lg whitespace-nowrap transition ${activeTab === tab
+                            ? "bg-white text-black shadow"
+                            : "hover:bg-gray-100"
+                            }`}
                     >
                         {tab}
                     </button>
@@ -315,4 +394,4 @@ export default DashboardCards;
 
 
 
-    
+

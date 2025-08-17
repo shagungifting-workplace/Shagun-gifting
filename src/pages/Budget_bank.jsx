@@ -70,6 +70,7 @@ export default function Budget_bank() {
                 totalFee: parseFloat(totalFee.toFixed(1)),
                 submittedAt: serverTimestamp(),
                 isComplete: true,
+                status: "Running",
             };
 
             await setDoc(
@@ -307,14 +308,33 @@ export default function Budget_bank() {
                             Bank Account Number *
                         </label>
                         <input
-                            type="number"
+                            type="text" // use text instead of number (to prevent scientific notation & leading zero issues)
                             name="accountNumber"
                             value={formData.accountNumber}
-                            onChange={handleChange}
+                            onChange={(e) => {
+                                const value = e.target.value;
+
+                                // Allow only digits
+                                if (/^\d*$/.test(value)) {
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        accountNumber: value,
+                                    }));
+                                }
+                            }}
                             required
+                            minLength={9}
+                            maxLength={18}
                             className="border rounded-md p-2"
                             placeholder="Enter account number"
                         />
+                        {formData.accountNumber &&
+                            (formData.accountNumber.length < 9 ||
+                            formData.accountNumber.length > 18) && (
+                            <p className="text-red-500 text-sm mt-1">
+                                Account number must be between 9 and 18 digits.
+                            </p>
+                        )}
                     </div>
 
                     {/* Account Holder Name */}
@@ -374,11 +394,27 @@ export default function Budget_bank() {
                         type="text"
                         name="ifsc"
                         value={formData.ifsc}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                        const value = e.target.value.toUpperCase(); // Convert to uppercase automatically
+
+                        // Allow only alphanumeric characters (A-Z, 0-9)
+                        if (/^[A-Za-z0-9]*$/.test(value) && value.length <= 11) {
+                            setFormData((prev) => ({
+                            ...prev,
+                            ifsc: value,
+                            }));
+                        }
+                        }}
                         required
+                        maxLength={11}
                         className="border rounded-md p-2"
                         placeholder="Enter IFSC code"
                     />
+                    {formData.ifsc && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(formData.ifsc) && (
+                        <p className="text-red-500 text-sm mt-1">
+                        IFSC must be 11 characters (first 4 alphabets, 5th is 0, last 6 alphanumeric).
+                        </p>
+                    )}
                 </div>
 
                 {/* check box  */}
@@ -406,19 +442,6 @@ export default function Budget_bank() {
                     policies
                 </p>
                 
-                {/* complete registration button */}
-                <button
-                    type="submit"
-                    disabled={!formData.accepted ||  !paymentSuccess}
-                    className={`w-full py-3 rounded-lg font-bold text-white mt-4 ${
-                        formData.accepted && paymentSuccess
-                            ? "bg-[#0a0a23] hover:bg-black"
-                            : "bg-gray-400 cursor-not-allowed"
-                    }`}
-                >
-                    Complete Registration
-                </button>
-
                 {formData.amount && (
                     <div className="bg-[#fff2e5] border border-[#ffc89d] p-4 rounded-lg text-center mt-6">
                         <h4 className="text-[#e05d00] font-semibold flex items-center justify-center gap-2 text-lg">
@@ -446,6 +469,19 @@ export default function Budget_bank() {
                         )}
                     </div>
                 )}
+
+                {/* complete registration button */}
+                <button
+                    type="submit"
+                    disabled={!formData.accepted ||  !paymentSuccess}
+                    className={`w-full py-3 rounded-lg font-bold text-white mt-4 ${
+                        formData.accepted && paymentSuccess
+                            ? "bg-[#0a0a23] hover:bg-black"
+                            : "bg-gray-400 cursor-not-allowed"
+                    }`}
+                >
+                    Complete Registration
+                </button>
             </form>
         </div>
     );

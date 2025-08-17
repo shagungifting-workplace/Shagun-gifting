@@ -135,8 +135,13 @@ export default function Personal_det() {
                         value={fullName}
                         required
                         autoFocus
-                        placeholder='Enter your full name'
-                        onChange={(e) => setFullName(e.target.value.toUpperCase())}
+                        placeholder="Enter your full name"
+                        onChange={(e) => {
+                            const val = e.target.value.toUpperCase();
+                            if (/^[A-Z\s]*$/.test(val)) {   // only alphabets & spaces
+                            setFullName(val);
+                            }
+                        }}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg mb-5 text-sm" 
                     />
 

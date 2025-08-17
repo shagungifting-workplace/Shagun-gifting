@@ -85,7 +85,7 @@ const Agents = () => {
                     transition-transform duration-500 ${showDrawer ? "translate-y-0" : "translate-y-full" }`}
                 style={{ height: "80vh" }}
             >
-                <AgentProfile setShowDrawer={setShowDrawer} /> 
+                <AgentProfile setShowDrawer={setShowDrawer} setAgents={setAgents} /> 
             </div>
 
             {/* Cards */}

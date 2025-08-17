@@ -5,22 +5,22 @@ export const fetchAllProjects = async () => {
     const usersRef = collection(db, "users");
     const usersSnapshot = await getDocs(usersRef);
     const projects = [];
-    console.log("users from fetch:", usersSnapshot)
 
     for (const userDoc of usersSnapshot.docs) {
         const uid = userDoc.id;
-        console.log("uid from fetch:", uid);
 
         const eventRef = doc(db, `users/${uid}/eventDetails/info`);
         const budgetRef = doc(db, `users/${uid}/eventDetails/budget`);
         const personalRef = doc(db, `users/${uid}/personalDetails/info`);
         const guestRef = collection(db, "users", uid, "eventDetails", "info", "guests");
+        const rechargeRef = doc(db, `users/${uid}/eventDetails/envelopeRecharges`);
 
-        const [eventSnap, budgetSnap, personalSnap, guestSnap] = await Promise.all([
+        const [eventSnap, budgetSnap, personalSnap, guestSnap, rechargeSnap] = await Promise.all([
             getDoc(eventRef),
             getDoc(budgetRef),
             getDoc(personalRef),
             getDocs(guestRef),
+            getDoc(rechargeRef),
         ]);
 
         if (eventSnap.exists() && budgetSnap.exists() && personalSnap.exists()) {
@@ -32,6 +32,10 @@ export const fetchAllProjects = async () => {
                 id: doc?.id,
                 ...doc.data()
             }));
+
+            const rechargeData = rechargeSnap.exists()
+                ? rechargeSnap.data().transactions || []
+                : [];
 
             const project = {
                 uid: uid,
@@ -64,6 +68,7 @@ export const fetchAllProjects = async () => {
                 fixedFee: budgetData.fixedFee || 0,
                 isComplete: budgetData.isComplete || false,
                 submittedAt: budgetData.submittedAt?.toDate?.().toLocaleString() || "",
+                status: budgetData?.status || "Running",
                 
                 // personal data
                 hostName: personalData.fullName || "Unknown",
@@ -75,6 +80,14 @@ export const fetchAllProjects = async () => {
                 heroName: personalData.heroName || "",
 
                 guests,                
+
+                // recharge data
+                recharges: rechargeData.map(r => ({
+                    transactionId: r.transactionId || "",
+                    rechargeAmount: r.rechargeAmount || 0,
+                    RechargePaid: r.RechargePaid || 0,
+                    paidAt: r.paidAt?.toDate?.().toLocaleString() || "",
+                })),
             };
 
             projects.push(project);

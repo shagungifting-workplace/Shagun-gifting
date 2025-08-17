@@ -42,7 +42,7 @@ export default function Profile() {
         const { name, value } = e.target;
         setForm((prev) => ({
             ...prev,
-            [name]: value,
+            [name]: value.toUpperCase(),
         }));
     };
 
@@ -95,81 +95,107 @@ export default function Profile() {
                 {/* Event Info */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mt-6">
                     <h3 className="col-span-full text-xl font-semibold">Event Details</h3>
+                    {/* event date */}
                     <div className="space-y-1">
                         <label htmlFor="eventDate" className="block text-sm font-medium text-orange-400">Event Date</label>
-                        <input 
-                            name="eventDate" 
+                        <input
+                            name="eventDate"
                             type="date"
-                            value={form?.eventDate} 
-                            onChange={handleChange} 
-                            className="input text-sm" 
-                            placeholder="Event Date" 
+                            value={form?.eventDate}
+                            onChange={handleChange}
+                            className="input text-sm"
+                            placeholder="Event Date"
+                            min={new Date().toISOString().split("T")[0]} // 👈 sets today as minimum
                         />
                     </div>
+
+                    {/* start time */}
                     <div className="space-y-1">
                         <label htmlFor="startTime" className="block text-sm font-medium text-orange-400">Start Time</label>
-                        <input 
-                            name="startTime" 
+                        <input
+                            name="startTime"
                             type="time"
-                            value={form?.startTime} 
-                            onChange={handleChange} 
-                            className="input text-sm" 
-                            placeholder="Start Time" 
+                            value={form?.startTime}
+                            onChange={handleChange}
+                            className="input text-sm"
+                            placeholder="Start Time"
                         />
                     </div>
+
+                    {/* end time */}
                     <div className="space-y-1">
                         <label htmlFor="endTime" className="block text-sm font-medium text-orange-400">End Time</label>
-                        <input 
-                            name="endTime" 
+                        <input
+                            name="endTime"
                             type="time"
-                            value={form?.endTime} 
-                            onChange={handleChange} 
-                            className="input text-sm" 
-                            placeholder="End Time" 
+                            value={form?.endTime}
+                            onChange={handleChange}
+                            className="input text-sm"
+                            placeholder="End Time"
                         />
                     </div>
+
+                    {/* venue */}
                     <div className="space-y-1">
                         <label htmlFor="venue" className="block text-sm font-medium text-orange-400">Venue</label>
-                        <input 
-                            name="venue" 
+                        <input
+                            name="venue"
                             type="text"
-                            value={form?.venue} 
-                            onChange={handleChange} 
-                            className="input text-sm" 
-                            placeholder="Venue Name" 
+                            value={form?.venue.toUpperCase()}
+                            onChange={handleChange}
+                            className="input text-sm"
+                            placeholder="Venue Name"
                         />
                     </div>
+
+                    {/* hero names */}
                     <div className="space-y-1">
                         <label htmlFor="heroNames" className="block text-sm font-medium text-orange-400">Hero Names</label>
-                        <input 
-                            name="heroNames" 
+                        <input
+                            name="heroNames"
                             type="text"
-                            value={form?.heroNames} 
-                            onChange={handleChange} 
-                            className="input text-sm" 
-                            placeholder="Hero Names" 
+                            value={form?.heroNames.toUpperCase()}
+                            onChange={handleChange}
+                            className="input text-sm"
+                            placeholder="Hero Names"
                         />
                     </div>
+
+                    {/* pin code */}
                     <div className="space-y-1">
-                        <label htmlFor="pin" className="block text-sm font-medium text-orange-400">Pin Code</label>
-                        <input 
-                            name="pin" 
-                            type="number"
-                            value={form?.pin} 
-                            onChange={handleChange} 
-                            className="input text-sm" 
-                            placeholder="Pin Code" 
+                        <label htmlFor="pin" className="block text-sm font-medium text-orange-400">
+                            Pin Code
+                        </label>
+                        <input
+                            name="pin"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="\d{6}"
+                            maxLength={6}
+                            value={form?.pin || ""}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                // allow only digits, up to 6 chars
+                                if (/^\d{0,6}$/.test(val)) {
+                                    handleChange(e);
+                                }
+                            }}
+                            className="input text-sm"
+                            placeholder="Enter 6-digit Pin Code"
+                            required
                         />
                     </div>
+
+                    {/* address */}
                     <div className="space-y-1">
                         <label htmlFor="address" className="block text-sm font-medium text-orange-400">Address</label>
-                        <input 
-                            name="address" 
+                        <input
+                            name="address"
                             type="text"
-                            value={form?.address} 
-                            onChange={handleChange} 
-                            className="input text-sm" 
-                            placeholder="Address" 
+                            value={form?.address.toUpperCase()}
+                            onChange={handleChange}
+                            className="input text-sm"
+                            placeholder="Address"
                         />
                     </div>
                 </div>
@@ -177,81 +203,133 @@ export default function Profile() {
                 {/* Budget Info */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mt-6">
                     <h3 className="col-span-full text-xl font-semibold">Budget Details</h3>
+                    {/* members */}
                     <div className="space-y-1">
                         <label htmlFor="members" className="block text-sm font-medium text-orange-400">No. of Members</label>
-                        <input 
-                            name="members" 
+                        <input
+                            name="members"
                             type="number"
-                            value={form?.members} 
-                            onChange={handleChange} 
-                            className="input text-sm" 
-                            placeholder="No. of Members" 
+                            value={form?.members}
+                            onChange={handleChange}
+                            className="input text-sm cursor-not-allowed"
+                            placeholder="No. of Members"
+                            disabled
                         />
                     </div>
+
+                    {/* total amount */}
                     <div className="space-y-1">
                         <label htmlFor="amount" className="block text-sm font-medium text-orange-400">Total Amount</label>
-                        <input 
-                            name="amount" 
+                        <input
+                            name="amount"
                             type="number"
-                            value={form?.amount} 
-                            onChange={handleChange} 
-                            className="input text-sm" 
-                            placeholder="Total Amount" 
+                            value={form?.amount}
+                            onChange={handleChange}
+                            className="input text-sm cursor-not-allowed"
+                            placeholder="Total Amount"
+                            disabled
                         />
                     </div>
+
+                    {/* Bank Details */}
                     <div className="space-y-1">
                         <label htmlFor="holderName" className="block text-sm font-medium text-orange-400">Bank Holder Name</label>
-                        <input 
-                            name="holderName" 
+                        <input
+                            name="holderName"
                             type="text"
-                            value={form?.bank?.holderName} 
-                            onChange={e => setForm({...form, bank: {...form.bank, holderName: e.target.value}})} 
-                            className="input text-sm" 
-                            placeholder="Account Holder Name" 
+                            value={form?.bank?.holderName.toUpperCase()}
+                            onChange={e => setForm({ ...form, bank: { ...form.bank, holderName: e.target.value } })}
+                            className="input text-sm"
+                            placeholder="Account Holder Name"
                         />
                     </div>
+
+                    {/* Bank Name */}
                     <div className="space-y-1">
                         <label htmlFor="bankName" className="block text-sm font-medium text-orange-400">Bank Name</label>
-                        <input 
-                            name="bankName" 
+                        <input
+                            name="bankName"
                             type="text"
-                            value={form?.bank?.name} 
-                            onChange={e => setForm({...form, bank: {...form.bank, name: e.target.value}})}
-                            className="input text-sm" 
-                            placeholder="Bank Name" 
+                            value={form?.bank?.name.toUpperCase()}
+                            onChange={e => setForm({ ...form, bank: { ...form.bank, name: e.target.value } })}
+                            className="input text-sm"
+                            placeholder="Bank Name"
                         />
                     </div>
+
+                    {/* Branch Name */}
                     <div className="space-y-1">
                         <label htmlFor="branchName" className="block text-sm font-medium text-orange-400">Branch Name</label>
-                        <input 
-                            name="branchName" 
+                        <input
+                            name="branchName"
                             type="text"
-                            value={form?.bank?.branch} 
-                            onChange={e => setForm({...form, bank: {...form.bank, branch: e.target.value}})}
-                            className="input text-sm" 
-                            placeholder="Branch Name" 
+                            value={form?.bank?.branch.toUpperCase()}
+                            onChange={e => setForm({ ...form, bank: { ...form.bank, branch: e.target.value } })}
+                            className="input text-sm"
+                            placeholder="Branch Name"
                         />
                     </div>
+
+                    {/* Account Number */}
                     <div className="space-y-1">
-                        <label htmlFor="accountNumber" className="block text-sm font-medium text-orange-400">Account Number</label>
-                        <input 
-                            name="accountNumber" 
-                            type="number"
-                            value={form?.bank?.account} 
-                            onChange={e => setForm({...form, bank: {...form.bank, account: e.target.value}})} 
-                            className="input" 
-                            placeholder="Account Number" 
+                        <label htmlFor="accountNumber" className="block text-sm font-medium text-orange-400">
+                            Account Number
+                        </label>
+                        <input
+                            name="accountNumber"
+                            type="text"
+                            value={form?.bank?.account || ""}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                // Allow only digits and ensure max length of 18
+                                if (/^\d{0,18}$/.test(val)) {
+                                    setForm({
+                                        ...form,
+                                        bank: { ...form.bank, account: val }
+                                    });
+                                }
+                            }}
+                            onBlur={(e) => {
+                                // Extra check on blur to enforce min 9 digits
+                                if (e.target.value.length < 9 || e.target.value.length > 18) {
+                                    alert("Account number must be between 9 and 18 digits");
+                                }
+                            }}
+                            className="input"
+                            placeholder="Account Number"
+                            required
                         />
                     </div>
+
+                    {/* IFSC Code */}
                     <div className="space-y-1">
-                        <label htmlFor="ifsc" className="block text-sm font-medium text-orange-400">IFSC Code</label>
-                        <input 
-                            name="ifsc" 
+                        <label htmlFor="ifsc" className="block text-sm font-medium text-orange-400">
+                            IFSC Code
+                        </label>
+                        <input
+                            name="ifsc"
                             type="text"
-                            value={form?.bank?.ifsc} 
-                            onChange={e => setForm({...form, bank: {...form.bank, ifsc: e.target.value}})}
-                            className="input" 
-                            placeholder="IFSC Code" 
+                            value={form?.bank?.ifsc || ""}
+                            onChange={(e) => {
+                                let val = e.target.value.toUpperCase(); // convert to uppercase
+                                // Allow only letters and numbers
+                                if (/^[A-Z0-9]*$/.test(val) && val.length <= 11) {
+                                    setForm({
+                                        ...form,
+                                        bank: { ...form.bank, ifsc: val }
+                                    });
+                                }
+                            }}
+                            onBlur={(e) => {
+                                const val = e.target.value;
+                                const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+                                if (!ifscRegex.test(val)) {
+                                    alert("Invalid IFSC Code. Format: 4 letters + 0 + 6 alphanumeric (total 11).");
+                                }
+                            }}
+                            className="input"
+                            placeholder="IFSC Code"
+                            required
                         />
                     </div>
                 </div>

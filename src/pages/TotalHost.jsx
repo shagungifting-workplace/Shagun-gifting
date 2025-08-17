@@ -11,12 +11,11 @@ import { auth, db } from "../utils/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
 
-const ActiveEvents = () => {
+const TotalHost = () => {
     const [projects, setProjects] = useState([]);
     const setLoading = useLoadingStore((state) => state.setLoading);
     const [activeEvents, setActiveEvents] = useState(0);
     const [postponedEvents, setPostponedEvents] = useState(0);
-    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         const getProjectByCode = async () => {
@@ -48,15 +47,8 @@ const ActiveEvents = () => {
         getProjectByCode();
     }, [setLoading]);
 
-    const runningProjects = projects.filter((proj) => proj?.status === "Running");
-
-    // Filter projects by host name (case-insensitive)
-    const filteredProjects = runningProjects.filter((proj) =>
-        proj?.hostName?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
     const handleDownload = () => {
-        const exportData = runningProjects.map((proj) => ({
+        const exportData = projects.map((proj) => ({
             "Project Code": proj?.projectCode || "N/A",
             "Host": proj?.hostName || "Unknown",
             "Envelopes Distributed": `${proj?.distributed || 0}/${proj?.members || 0}`,
@@ -145,16 +137,14 @@ const ActiveEvents = () => {
                 </div>
 
                 {/* Search Bar */}
-                <div className="flex justify-between">
+                <div className="flex justify-between ">
                     <div>
                         <h1 className="font-bold text-xl">Project</h1>
                     </div>
                     <div className="mb-4 relative w-1/3 max-w-sm">
                         <input
                             type="text"
-                            placeholder="Enter host name to search"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Search code or host..."
                             className="w-full p-2 pr-10 border border-gray-300 rounded-md"
                         />
                         <IoSearch className="absolute right-3 top-2.5 text-gray-500 text-lg" />
@@ -178,7 +168,7 @@ const ActiveEvents = () => {
                         </thead>
 
                         <tbody>
-                            {filteredProjects.map((proj, i) => (
+                            {projects.map((proj, i) => (
                                 <tr key={i} className="border-t lg:text-sm text-xs">
                                     {/* uid */}
                                     <td className="lg:p-3 p-2">
@@ -348,4 +338,4 @@ const ActiveEvents = () => {
     );
 };
 
-export default ActiveEvents;
+export default TotalHost;

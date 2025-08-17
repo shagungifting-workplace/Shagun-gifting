@@ -138,12 +138,14 @@ export default function Event_det() {
                             <div className="flex flex-col flex-1 min-w-[240px]">
                                 <label className="font-medium mb-1">PIN Code (Venue) *</label>
                                 <input
-                                    type="number"
+                                    type="text"
                                     placeholder="Enter venue PIN code"
                                     value={pin}
                                     onChange={(e) => setPin(e.target.value)}
                                     required
                                     className="p-2 border rounded-md"
+                                    pattern="\d{6}"
+                                    maxLength={6}
                                 />
                             </div>
 
@@ -190,6 +192,7 @@ export default function Event_det() {
                                     onChange={(e) => setEventDate(e.target.value)}
                                     required
                                     className="p-2 border rounded-md"
+                                    min={new Date().toISOString().split("T")[0]} // 👈 sets today as minimum
                                 />
                             </div>
                             <div className="flex flex-col flex-1 min-w-[200px]">
@@ -218,16 +221,23 @@ export default function Event_det() {
                         <div className="flex flex-wrap gap-4">
                             {/* event number */}
                             <div className="flex flex-col flex-1 min-w-[240px]">
-                                <label className="font-medium mb-1">Event Number (Sl.No. in the same Venue) *</label>
+                                <label className="font-medium mb-1">
+                                    Event Number (Sl.No. in the same Venue) *
+                                </label>
                                 <input
                                     type="number"
                                     placeholder="Event sequence number"
                                     value={eventNumber}
-                                    onChange={(e) => setEventNumber(e.target.value)}
-                                    min="1"
-                                    step="1"
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (/^[1-9]?$/.test(val)) {
+                                            setEventNumber(val);
+                                        }
+                                    }}
                                     required
-                                    onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
+                                    onKeyDown={(e) =>
+                                        ["e", "E", "+", "-", ".", "0"].includes(e.key) && e.preventDefault()
+                                    }
                                     className="p-2 border rounded-md"
                                 />
                             </div>
@@ -238,7 +248,7 @@ export default function Event_det() {
                                 <input
                                     type="text"
                                     placeholder="Enter name"
-                                    value={heroNames}
+                                    value={heroNames.toUpperCase()}
                                     onChange={(e) => {
                                         const input = e.target.value.toUpperCase();
                                         setHeroNames(input);

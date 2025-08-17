@@ -4,7 +4,6 @@ import { FaCloudUploadAlt } from "react-icons/fa";
 import { db, auth } from '../utils/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 
-
 const FloatingInput = ({ label, name, type = "text", value, onChange, required = false }) => {
     return (
         <div className="relative w-full">
@@ -30,7 +29,7 @@ const FloatingInput = ({ label, name, type = "text", value, onChange, required =
     );
 };
 
-export default function AgentProfileForm({ setShowDrawer }) {
+export default function AgentProfileForm({ setShowDrawer, setAgents }) {
 
     const [formData, setFormData] = useState({
         agentId: "",
@@ -71,7 +70,7 @@ export default function AgentProfileForm({ setShowDrawer }) {
         try {
             const currentUser = auth.currentUser;
             if (!currentUser) {
-                alert("Admin not logged in");
+                toast.error("Admin not logged in");
                 return;
             }
 
@@ -82,16 +81,54 @@ export default function AgentProfileForm({ setShowDrawer }) {
                 ...agentData,
                 createdAt: new Date(),
             });
+
+            // ✅ Update local state (avoid duplicate)
+            setAgents(prevAgents => {
+                const exists = prevAgents.find(agent => agent.agentId === agentData.agentId);
+                if (exists) {
+                    // replace the old entry
+                    return prevAgents.map(agent =>
+                        agent.agentId === agentData.agentId ? { ...agent, ...agentData } : agent
+                    );
+                }
+                // add new entry
+                return [...prevAgents, agentData];
+            });
+
             toast.success("Agent added successfully!");
-            setShowDrawer(false); 
+            setShowDrawer(false);
         } catch (error) {
             console.error("Error adding agent:", error);
             toast.error("Failed to add agent");
         }
     };
 
+
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // Mobile validation (only 10 digits)
+        const mobileRegex = /^[0-9]{10}$/;
+        if (!mobileRegex.test(formData.mobile)) {
+            toast.error("Mobile number must be exactly 10 digits");
+            return;
+        }
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            toast.error("Please enter a valid email address");
+            return;
+        }
+
+        // PIN validation (only 6 digits)
+        const pinRegex = /^[0-9]{6}$/;
+        if (!pinRegex.test(formData.pin)) {
+            toast.error("PIN Code must be exactly 6 digits");
+            return;
+        }
+
+        // If all validations pass
         console.log(formData, file);
         handleAddAgent(formData);
     };
@@ -109,8 +146,26 @@ export default function AgentProfileForm({ setShowDrawer }) {
                 <FloatingInput label="Agent ID" name="agentId" value={formData.agentId} onChange={handleChange} required />
                 <FloatingInput label="Full Name" name="fullName" value={formData.fullName} onChange={handleChange} required />
                 <FloatingInput label="Email Address" name="email" type="email" value={formData.email} onChange={handleChange} required />
-                <FloatingInput label="Mobile Number" name="mobile" type="tel" value={formData.mobile} onChange={handleChange} required />
-                <FloatingInput label="PIN Code" name="pin" value={formData.pin} onChange={handleChange} required />
+                <FloatingInput
+                    label="Mobile Number"
+                    name="mobile"
+                    type="number"
+                    value={formData.mobile}
+                    onChange={handleChange}
+                    required
+                    pattern="[0-9]{10}"
+                    maxLength="10"
+                />
+                <FloatingInput
+                    label="PIN Code"
+                    name="pin"
+                    value={formData.pin}
+                    onChange={handleChange}
+                    required
+                    type="number"
+                    pattern="[0-9]{6}"
+                    maxLength="6"
+                />
 
                 <div className="relative w-full">
                     <select
@@ -155,15 +210,14 @@ export default function AgentProfileForm({ setShowDrawer }) {
                         {/* Upload label on top */}
                         <label
                             htmlFor="fileInput"
-                            className={`absolute inset-0 z-10 flex flex-col items-center justify-center text-center gap-2 hover:bg-white/70 transition-opacity duration-300 ${
-                                file ? "opacity-0 group-hover:opacity-100" : "opacity-100"
-                            }`}
+                            className={`absolute inset-0 z-10 flex flex-col items-center justify-center text-center gap-2 hover:bg-white/70 transition-opacity duration-300 ${file ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+                                }`}
                         >
                             <FaCloudUploadAlt className="text-2xl text-[#f45b0b]" />
                             <span className="text-sm text-gray-600 px-2">
                                 {file
-                                ? "Click to change the file"
-                                : "Click to upload or drag and drop PDF/JPG of PAN or Aadhaar card."}
+                                    ? "Click to change the file"
+                                    : "Click to upload or drag and drop PDF/JPG of PAN or Aadhaar card."}
                             </span>
                         </label>
 
@@ -180,7 +234,7 @@ export default function AgentProfileForm({ setShowDrawer }) {
                     {/* PDF fallback message */}
                     {!previewUrl && file?.type === "application/pdf" && (
                         <div className="mt-2 text-sm text-gray-500">
-                        PDF file uploaded: <span className="font-medium">{file.name}</span>
+                            PDF file uploaded: <span className="font-medium">{file.name}</span>
                         </div>
                     )}
                 </div>
@@ -206,7 +260,7 @@ export default function AgentProfileForm({ setShowDrawer }) {
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Notes and Remark */}
                 <div className="relative w-full">
                     <textarea

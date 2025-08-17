@@ -25,6 +25,7 @@ import Services from "./pages/Services.jsx";
 import ContactUs from "./pages/ContactUs.jsx";
 import AgentProfile from "./pages/AgentProfile.jsx";
 import Profile from "./pages/Profile.jsx";
+import TotalHost from "./pages/TotalHost.jsx";
 
 function AppContent() {
     const location = useLocation();
@@ -71,6 +72,7 @@ function AppContent() {
                 <Route path="/agent" element={<AgentProfile />} />
                 <Route path="/host_dash" element={<Host_Dashboard />} />
                 <Route path="/active-events" element={<ActiveEvents />} />
+                <Route path="/total-hosts" element={<TotalHost />} />
                 <Route path="/project/:code" element={<ProjectCodePage />} />
                 <Route
                     path="*"

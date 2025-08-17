@@ -2,18 +2,19 @@ import React, { useEffect, useState } from "react";
 import { IoGiftOutline } from "react-icons/io5";
 import { IoIosArrowForward } from "react-icons/io";
 import { LuSmartphone, LuQrCode, LuShield } from "react-icons/lu";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // images
 import sliderImg1 from '../assets/slider_img1.jpg';
-// import sliderImg2 from '../assets/slider_img2.jpg';
+import sliderImg2 from '../assets/slider_img2.jpg';
 import sliderImg3 from '../assets/slider_img3.jpg';
 import sliderImg4 from '../assets/slider_img4.jpg';
 import sliderImg5 from '../assets/about_us.png';
 import sliderImg6 from '../assets/image6.webp';
+import { MdContactMail } from "react-icons/md";
 
 // ImageSlider component
-const images = [sliderImg1, sliderImg5, sliderImg3, sliderImg4, sliderImg6];
+const images = [sliderImg1, sliderImg2, sliderImg3, sliderImg4, sliderImg2, sliderImg5, sliderImg6];
 
 const ImageSlider = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -27,7 +28,7 @@ const ImageSlider = () => {
 
     const getVisibleImages = () => {
         const indices = [];
-        for (let i = -2; i <= 2; i++) {
+        for (let i = -3; i <= 3; i++) {
             const index = (currentIndex + i + images.length) % images.length;
             indices.push(index);
         }
@@ -39,14 +40,14 @@ const ImageSlider = () => {
             <div className="flex justify-center items-center transition-transform duration-700 ease-in-out">
                 <div className="flex gap-4 md:gap-8 lg:gap-16">
                     {getVisibleImages().map((imageIndex, i) => {
-                        const isCenter = i === 2;
+                        const isCenter = i === 3;
                         return (
                             <div
                                 key={`${imageIndex}-${i}`}
                                 className={`
                                     transition-all duration-700 transform w-[120px] sm:w-[180px] md:w-[240px] lg:w-[270px] 
-                                    ${ isCenter ? "scale-100 opacity-100 z-10" : "scale-100 opacity-40"} ease-in-out 
-                                    ${ i === 0 || i === 4 ? "hidden sm:block opacity-0 scale-90" : ""} rounded-xl overflow-hidden
+                                    ${isCenter ? "scale-100 opacity-100 z-10" : "scale-100 opacity-40"} ease-in-out 
+                                    ${i === 0 || i === 6 ? "hidden sm:block opacity-0 scale-90" : ""} rounded-xl overflow-hidden
                                 `}
                             >
                                 <img
@@ -64,6 +65,7 @@ const ImageSlider = () => {
 };
 
 const Home = () => {
+    const navigate = useNavigate();
     return (
         <div className="text-center" id="home">
             {/* Hero Section */}
@@ -76,21 +78,25 @@ const Home = () => {
                     our IoT-enabled vending machines. Secure, traceable, and
                     convenient.
                 </p>
-                <div className="flex justify-center gap-4 flex-wrap mb-5">
-                    <ul>
-                        <li>
-                            <Link to="/hostlogin">
-                                <button className="flex items-center gap-2 border border-[#fa541c] py-2 px-6 rounded-lg bg-white text-[#a44b2e] hover:bg-gray-100">
-                                    <IoGiftOutline />
-                                    Register as Host    
-                                </button>
-                            </Link>
-                        </li>
-                    </ul>
-                </div>
+                <div className="flex justify-center w-fit items-center mx-auto sm:gap-10 gap-5 sm:flex-row flex-col mb-5">
+                    <button
+                        onClick={() => navigate("/hostlogin")}
+                        className="flex items-center gap-2 border border-[#fa541c] py-2 px-6 rounded-lg bg-white text-[#a44b2e] hover:bg-gray-100"
+                    >
+                        <IoGiftOutline />
+                        Register as Host
+                    </button>
 
+                    <button
+                        onClick={() => navigate("/contact")}
+                        className="flex items-center gap-2 border border-[#fa541c] py-2 px-6 rounded-lg bg-white text-[#a44b2e] hover:bg-gray-100"
+                    >
+                        <MdContactMail />
+                        Enquiry Now
+                    </button>
+                </div>
                 {/* Image Slider Section */}
-                <div className="max-w-6xl mx-auto mt-">
+                <div className="max-w-[1100px] mx-auto mt-">
                     {/*<h3 className="text-2xl font-semibold mb-6 text-orange-700">What It Looks Like</h3>*/}
                     <div className="w-full flex justify-center items-center overflow-hidden shadow-[0_10px_20px_rgba(245,101,39,0.3)] cursor-pointer p-9 rounded-xl ">
                         <ImageSlider />
