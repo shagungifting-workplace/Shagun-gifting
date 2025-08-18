@@ -3,8 +3,9 @@ import { FaMapMarkerAlt } from "react-icons/fa";
 import { FiMessageSquare } from "react-icons/fi";
 import AgentProfile from "../../pages/AgentProfile"; 
 import { useLoadingStore } from "../../store/useLoadingStore";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { auth, db } from "../../utils/firebase";
+import { RiDeleteBin6Line } from "react-icons/ri";
 
 const Agents = () => {
 
@@ -57,6 +58,23 @@ const Agents = () => {
 
         const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${recipientEmail}&su=${subject}&body=${body}`;
         window.open(gmailUrl, "_blank");
+    };
+
+    // ✅ Handle delete agent
+    const handleDelete = async (agentId) => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        if (!window.confirm("Are you sure you want to delete this agent?")) return;
+
+        try {
+            await deleteDoc(doc(db, `admin/${user.uid}/agentDetails/${agentId}`));
+            setAgents((prevAgents) => prevAgents.filter((agent) => agent.id !== agentId));
+            console.log("Agent deleted successfully!");
+        } catch (error) {
+            console.error("Error deleting agent:", error);
+            alert("Failed to delete agent. Please try again.");
+        }
     };
 
     return (
@@ -124,12 +142,25 @@ const Agents = () => {
 
                     {/* Agent Info */}
                     <div>
-                        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">
-                            {agent?.fullName}
-                        </h3>
-                        <p className="text-gray-500 text-sm sm:text-base mb-2">
-                            {agent?.status}
-                        </p>
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">
+                                    {agent?.fullName}
+                                </h3>
+                                <p className="text-gray-500 text-sm sm:text-base mb-2">
+                                    {agent?.status}
+                                </p>
+                            </div>
+
+                            {/* Delete button */}
+                            <button
+                                onClick={() => handleDelete(agent.id)}
+                                className="text-red-500 hover:text-red-700 p-1 rounded-md"
+                                title="Delete Agent"
+                            >
+                                <RiDeleteBin6Line size={18} />
+                            </button>
+                        </div>
 
                         <div className="text-sm text-gray-700 space-y-2 mt-3">
                             <p className="flex justify-between">
